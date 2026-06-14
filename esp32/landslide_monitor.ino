@@ -11,8 +11,8 @@
 const char* ssid = "YOUR_WIFI_SSID";
 const char* password = "YOUR_WIFI_PASSWORD";
 
-// Backend API endpoint
-const char* serverUrl = "http://YOUR_BACKEND_IP:5000/api/sensor-data";
+// Backend API endpoint - YOUR LIVE PRODUCTION URL
+const char* serverUrl = "https://landslide-api.onrender.com/api/sensor-data";
 
 // Sensor pins
 const int SOIL_MOISTURE_PIN = 34;
