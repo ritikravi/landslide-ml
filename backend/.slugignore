@@ -1,0 +1,6 @@
+frontend/
+ml/
+esp32/
+*.md
+.github/
+.git/

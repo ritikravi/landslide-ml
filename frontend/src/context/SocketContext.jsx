@@ -17,7 +17,8 @@ export const SocketProvider = ({ children }) => {
   const [latestData, setLatestData] = useState(null);
 
   useEffect(() => {
-    const socketInstance = io('http://localhost:5000');
+    const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+    const socketInstance = io(SOCKET_URL);
 
     socketInstance.on('connect', () => {
       console.log('✅ Connected to server');

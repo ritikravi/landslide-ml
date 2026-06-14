@@ -51,20 +51,34 @@ A production-ready MERN stack IoT application for real-time landslide monitoring
 - Pandas + NumPy
 - TensorFlow Lite
 
+## 🌐 Live Demo
+
+- **Frontend**: [https://landslide-monitoring.vercel.app](https://landslide-monitoring.vercel.app) *(Deploy yours!)*
+- **Backend API**: [https://landslide-api.onrender.com](https://landslide-api.onrender.com) *(Deploy yours!)*
+
 ## 🚀 Quick Start
 
-### Prerequisites
+### Option 1: Use Deployed Version (Easiest)
+
+Follow [DEPLOYMENT.md](DEPLOYMENT.md) to deploy on:
+- **Frontend**: Vercel (Free)
+- **Backend**: Render (Free)
+- **Database**: MongoDB Atlas (Free)
+
+### Option 2: Local Development
+
+#### Prerequisites
 
 - Node.js 18 or higher
 - MongoDB 6 or higher
 - Python 3.8+ (for ML features)
 - ESP32 board with sensors (optional)
 
-### 1️⃣ Clone Repository
+#### 1️⃣ Clone Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/landslide-monitoring.git
-cd landslide-monitoring
+git clone https://github.com/ritikravi/landslide-ml.git
+cd landslide-ml
 ```
 
 ### 2️⃣ Backend Setup

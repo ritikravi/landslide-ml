@@ -1,0 +1,8 @@
+backend/
+ml/
+esp32/
+node_modules/
+*.md
+!README.md
+.github/
+.git/
