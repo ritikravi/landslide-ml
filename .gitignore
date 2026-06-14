@@ -1,0 +1,27 @@
+
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+
+# Environment
+.env
+.env.local
+
+# Build outputs
+dist/
+build/
+*.log
+
+# ML
+ml/datasets/*.csv
+ml/models/*.pkl
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
