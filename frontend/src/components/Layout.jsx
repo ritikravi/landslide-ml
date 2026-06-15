@@ -19,7 +19,7 @@ const Layout = ({ children }) => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <Activity className="w-8 h-8 text-blue-500" />
-              <h1 className="text-2xl font-bold">Landslide Monitoring</h1>
+              <h1 className="text-2xl font-bold">🌋 Landslide Monitor [LIVE]</h1>
             </div>
             <ConnectionStatus />
           </div>
