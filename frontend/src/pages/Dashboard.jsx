@@ -95,10 +95,10 @@ const Dashboard = () => {
         />
         <StatCard
           title="Vibration"
-          value={sensorData?.vibration?.toFixed(1)}
+          value={sensorData?.vibration ? '⚠️ DETECTED' : 'None'}
           unit=""
           icon={Activity}
-          color="red"
+          color={sensorData?.vibration ? 'red' : 'gray'}
         />
         <StatCard
           title="Distance"
