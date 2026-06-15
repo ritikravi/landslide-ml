@@ -70,28 +70,28 @@ const Dashboard = () => {
         riskScore={prediction?.riskScore}
       />
 
-      {/* Sensor Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* ESP32 Status Card */}
-        <div className={`p-6 rounded-lg border-2 ${esp32Active ? 'bg-green-900/20 border-green-500' : 'bg-gray-800/50 border-gray-600'}`}>
-          <div className="flex items-center justify-between">
+      {/* ESP32 Hardware Status */}
+      <div className="bg-gray-800 p-4 rounded-lg border border-gray-700 mb-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <Activity className={`w-6 h-6 ${esp32Active ? 'text-green-500' : 'text-gray-500'}`} />
             <div>
-              <p className="text-sm text-gray-400 mb-1">ESP32 Status</p>
-              <p className={`text-2xl font-bold ${esp32Active ? 'text-green-500' : 'text-gray-400'}`}>
-                {esp32Active ? 'Connected' : 'Disconnected'}
+              <p className="text-sm text-gray-400">ESP32 Hardware</p>
+              <p className={`text-lg font-bold ${esp32Active ? 'text-green-500' : 'text-gray-400'}`}>
+                {esp32Active ? 'Connected & Active' : 'Disconnected'}
               </p>
-              {sensorData?.timestamp && (
-                <p className="text-xs text-gray-500 mt-1">
-                  Last: {Math.floor((new Date() - new Date(sensorData.timestamp)) / 1000)}s ago
-                </p>
-              )}
-            </div>
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${esp32Active ? 'bg-green-500/20' : 'bg-gray-700'}`}>
-              <Activity className={`w-6 h-6 ${esp32Active ? 'text-green-500' : 'text-gray-500'}`} />
             </div>
           </div>
+          {sensorData?.timestamp && (
+            <p className="text-sm text-gray-400">
+              Last data: {Math.floor((new Date() - new Date(sensorData.timestamp)) / 1000)}s ago
+            </p>
+          )}
         </div>
-        
+      </div>
+
+      {/* Sensor Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard
           title="Soil Moisture"
           value={sensorData?.soilMoisture?.toFixed(1)}
