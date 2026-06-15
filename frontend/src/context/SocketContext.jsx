@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
+import { sensorAPI } from '../services/api';
 
 const SocketContext = createContext(null);
 
@@ -23,6 +24,9 @@ export const SocketProvider = ({ children }) => {
     socketInstance.on('connect', () => {
       console.log('✅ Connected to server');
       setIsConnected(true);
+      
+      // Fetch latest data from API when socket connects
+      fetchLatestData();
     });
 
     socketInstance.on('disconnect', () => {
@@ -40,6 +44,17 @@ export const SocketProvider = ({ children }) => {
       socketInstance.disconnect();
     };
   }, []);
+
+  const fetchLatestData = async () => {
+    try {
+      const response = await sensorAPI.getLatest();
+      if (response.data.data) {
+        setLatestData({ sensorData: response.data.data });
+      }
+    } catch (error) {
+      console.log('No previous data available');
+    }
+  };
 
   return (
     <SocketContext.Provider value={{ socket, isConnected, latestData }}>
