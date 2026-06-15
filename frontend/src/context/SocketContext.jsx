@@ -49,6 +49,7 @@ export const SocketProvider = ({ children }) => {
     try {
       const response = await sensorAPI.getLatest();
       if (response.data.data) {
+        console.log('Loaded initial data:', response.data.data.timestamp);
         setLatestData({ sensorData: response.data.data });
       }
     } catch (error) {
