@@ -17,6 +17,23 @@ export const SocketProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [latestData, setLatestData] = useState(null);
 
+  // Fetch initial data on mount
+  useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        const response = await sensorAPI.getLatest();
+        if (response.data.data) {
+          console.log('📊 Loaded initial data from API:', response.data.data.timestamp);
+          setLatestData({ sensorData: response.data.data });
+        }
+      } catch (error) {
+        console.log('ℹ️ No previous sensor data available');
+      }
+    };
+    
+    loadInitialData();
+  }, []);
+
   useEffect(() => {
     const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
     const socketInstance = io(SOCKET_URL);
@@ -24,9 +41,6 @@ export const SocketProvider = ({ children }) => {
     socketInstance.on('connect', () => {
       console.log('✅ Connected to server');
       setIsConnected(true);
-      
-      // Fetch latest data from API when socket connects
-      fetchLatestData();
     });
 
     socketInstance.on('disconnect', () => {
@@ -44,18 +58,6 @@ export const SocketProvider = ({ children }) => {
       socketInstance.disconnect();
     };
   }, []);
-
-  const fetchLatestData = async () => {
-    try {
-      const response = await sensorAPI.getLatest();
-      if (response.data.data) {
-        console.log('Loaded initial data:', response.data.data.timestamp);
-        setLatestData({ sensorData: response.data.data });
-      }
-    } catch (error) {
-      console.log('No previous data available');
-    }
-  };
 
   return (
     <SocketContext.Provider value={{ socket, isConnected, latestData }}>
