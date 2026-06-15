@@ -19,6 +19,9 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (latestData) {
+      console.log('📊 Received sensor data:', latestData.sensorData);
+      console.log('🔔 Vibration value:', latestData.sensorData?.vibration);
+      
       setSensorData(latestData.sensorData);
       setPrediction(latestData.prediction);
       setHistory((prev) => [latestData.sensorData, ...prev].slice(0, 50));
