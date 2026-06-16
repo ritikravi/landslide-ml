@@ -4,6 +4,12 @@ import mlService from '../services/mlService.js';
 
 export const submitSensorData = async (req, res, next) => {
   try {
+    // Map 'distance' from ESP32 to 'ultrasonicDistance' in database
+    if (req.body.distance !== undefined) {
+      req.body.ultrasonicDistance = req.body.distance;
+      delete req.body.distance;
+    }
+    
     const sensorData = new SensorData(req.body);
     await sensorData.save();
 

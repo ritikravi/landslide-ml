@@ -7,13 +7,19 @@
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 #include <Wire.h>
+#include <TinyGPS++.h>
 
 const char* ssid = "Ritik";
 const char* password = "rrrrrrrr";
 const char* serverUrl = "https://landslide-api.onrender.com/api/sensor-data";
 
-#define SOIL_PIN 34
-#define VIBRATION_PIN 27  // Vibration sensor DO pin
+#define SOIL_PIN 34        // Soil moisture sensor
+#define WATER_PIN 35       // Water level sensor  
+#define VIBRATION_PIN 27   // Vibration sensor DO pin
+#define GPS_RX_PIN 16      // GPS TX connects to ESP32 GPIO16
+#define GPS_TX_PIN 17      // GPS RX connects to ESP32 GPIO17
+#define TRIG_PIN 25        // Ultrasonic TRIG
+#define ECHO_PIN 26        // Ultrasonic ECHO
 const int MPU_ADDR = 0x68;
 
 unsigned long lastSendTime = 0;
@@ -24,6 +30,9 @@ int vibrationCount = 0;  // Count vibrations in 30-second window
 int SDA_PIN = 21;
 int SCL_PIN = 22;
 bool mpu6050Found = false;
+
+TinyGPSPlus gps;
+HardwareSerial gpsSerial(2);  // Use UART2
 
 bool scanI2C() {
   byte error, address;
@@ -75,6 +84,16 @@ void setup() {
   
   // Setup vibration sensor pin
   pinMode(VIBRATION_PIN, INPUT);
+  
+  // Setup ultrasonic sensor pins
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+  Serial.println("📏 Ultrasonic sensor initialized on GPIO25/26");
+  
+  // Setup GPS - Try standard configuration first
+  gpsSerial.begin(9600, SERIAL_8N1, GPS_RX_PIN, GPS_TX_PIN);
+  Serial.println("🛰️  GPS module initialized on GPIO16(RX)/GPIO17(TX)");
+  Serial.println("⏳ Testing GPS for 5 seconds...");
   
   Serial.println("\n\n========================================");
   Serial.println("🔧 MPU6050 DIAGNOSTIC MODE");
@@ -158,6 +177,43 @@ found:
   delay(100);
   
 skip:
+  // Test GPS for 5 seconds to see if we're getting data
+  unsigned long gpsTestStart = millis();
+  int charsReceived = 0;
+  
+  while (millis() - gpsTestStart < 5000) {
+    if (gpsSerial.available() > 0) {
+      char c = gpsSerial.read();
+      charsReceived++;
+      gps.encode(c);
+    }
+  }
+  
+  Serial.println("\n========================================");
+  Serial.println("🛰️  GPS CONNECTION TEST");
+  Serial.println("========================================");
+  Serial.print("Characters received: ");
+  Serial.println(charsReceived);
+  
+  if (charsReceived == 0) {
+    Serial.println("\n❌ NO DATA from GPS!");
+    Serial.println("\n⚠️  TX/RX might be SWAPPED!");
+    Serial.println("Try swapping the wires:");
+    Serial.println("  GPS TX → ESP32 GPIO17 (instead of GPIO16)");
+    Serial.println("  GPS RX → ESP32 GPIO16 (instead of GPIO17)");
+    Serial.println("\nOR check:");
+    Serial.println("  1. GPS VCC connected to 5V");
+    Serial.println("  2. GPS GND connected to GND");
+    Serial.println("  3. Wires are not broken");
+    Serial.println("  4. GPS module LED is blinking");
+  } else {
+    Serial.println("\n✅ GPS is sending data!");
+    Serial.print("Sentences processed: ");
+    Serial.println(gps.sentencesWithFix());
+    Serial.println("\nGPS hardware OK. Move outside for satellite lock.");
+  }
+  Serial.println("========================================\n");
+  
   connectWiFi();
 }
 
@@ -178,6 +234,27 @@ void connectWiFi() {
     Serial.println(WiFi.localIP());
     Serial.println("");
   }
+}
+
+float readUltrasonicDistance() {
+  // Send 10us pulse to TRIG
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+  
+  // Read ECHO pulse duration
+  long duration = pulseIn(ECHO_PIN, HIGH, 30000); // 30ms timeout
+  
+  if (duration == 0) {
+    return -1; // No echo received
+  }
+  
+  // Calculate distance in cm (speed of sound = 343 m/s)
+  float distance = duration * 0.0343 / 2;
+  
+  return distance;
 }
 
 void readMPU6050(float &tiltX, float &tiltY) {
@@ -221,10 +298,26 @@ void readMPU6050(float &tiltX, float &tiltY) {
 }
 
 void loop() {
+  // Read GPS data
+  while (gpsSerial.available() > 0) {
+    gps.encode(gpsSerial.read());
+  }
+  
+  // Read ultrasonic distance sensor
+  float distance = readUltrasonicDistance();
+  
+  // Read soil moisture sensor
   int soilRaw = analogRead(SOIL_PIN);
   float soilMoisture = map(soilRaw, 2800, 1200, 0, 100);
   if (soilMoisture < 0) soilMoisture = 0;
   if (soilMoisture > 100) soilMoisture = 100;
+  
+  // Read water level sensor
+  int waterRaw = analogRead(WATER_PIN);
+  // INVERTED: High reading (dry) = 0%, Low reading (wet) = 100%
+  float waterLevel = map(waterRaw, 4095, 0, 0, 100);  // Inverted mapping
+  if (waterLevel < 0) waterLevel = 0;
+  if (waterLevel > 100) waterLevel = 100;
   
   // Read vibration sensor
   int vibrationState = digitalRead(VIBRATION_PIN);
@@ -239,9 +332,35 @@ void loop() {
   readMPU6050(tiltX, tiltY);
   float tiltAngle = sqrt(tiltX * tiltX + tiltY * tiltY);
   
+  // Get GPS data
+  float latitude = 0.0;
+  float longitude = 0.0;
+  int satellites = 0;
+  
+  if (gps.location.isValid()) {
+    latitude = gps.location.lat();
+    longitude = gps.location.lng();
+  }
+  
+  if (gps.satellites.isValid()) {
+    satellites = gps.satellites.value();
+  }
+  
   Serial.println("------ SENSOR DATA ------");
+  Serial.print("Distance: ");
+  if (distance > 0) {
+    Serial.print(distance, 1);
+    Serial.println(" cm");
+  } else {
+    Serial.println("N/A");
+  }
+  
   Serial.print("Soil: ");
   Serial.print(soilMoisture, 1);
+  Serial.println("%");
+  
+  Serial.print("Water Level: ");
+  Serial.print(waterLevel, 1);
   Serial.println("%");
   
   Serial.print("Vibration: ");
@@ -252,6 +371,24 @@ void loop() {
   }
   Serial.print("Vibration Count (30s): ");
   Serial.println(vibrationCount);
+  
+  Serial.print("GPS: ");
+  if (gps.location.isValid()) {
+    Serial.print(latitude, 6);
+    Serial.print(", ");
+    Serial.print(longitude, 6);
+    Serial.print(" (");
+    Serial.print(satellites);
+    Serial.println(" sats)");
+  } else {
+    Serial.print("Searching... (");
+    Serial.print(satellites);
+    Serial.print(" sats, ");
+    Serial.print(gps.charsProcessed());
+    Serial.print(" chars, ");
+    Serial.print(gps.sentencesWithFix());
+    Serial.println(" fixes)");
+  }
   
   if (mpu6050Found) {
     Serial.print("Tilt X: ");
@@ -273,7 +410,7 @@ void loop() {
   if (firstRun || (currentTime - lastSendTime >= sendInterval)) {
     if (WiFi.status() == WL_CONNECTED) {
       // Send the vibration count from the 30-second window
-      sendDataToCloud(soilMoisture, tiltAngle, vibrationCount);
+      sendDataToCloud(soilMoisture, waterLevel, tiltAngle, vibrationCount, latitude, longitude, distance);
       
       // Reset count after sending
       vibrationCount = 0;
@@ -286,7 +423,7 @@ void loop() {
   delay(2000);
 }
 
-void sendDataToCloud(float soilMoisture, float tilt, int vibration) {
+void sendDataToCloud(float soilMoisture, float waterLevel, float tilt, int vibration, float latitude, float longitude, float distance) {
   Serial.println("📡 Sending to cloud...");
   
   HTTPClient http;
@@ -294,10 +431,22 @@ void sendDataToCloud(float soilMoisture, float tilt, int vibration) {
   http.addHeader("Content-Type", "application/json");
   http.setTimeout(20000);
   
-  StaticJsonDocument<256> doc;
+  StaticJsonDocument<300> doc;
   doc["soilMoisture"] = soilMoisture;
+  doc["waterLevel"] = waterLevel;
   doc["tilt"] = tilt;
   doc["vibration"] = vibration;
+  
+  // Send distance if valid
+  if (distance > 0) {
+    doc["distance"] = distance;
+  }
+  
+  // Only send GPS if we have a valid fix
+  if (latitude != 0.0 && longitude != 0.0) {
+    doc["latitude"] = latitude;
+    doc["longitude"] = longitude;
+  }
   
   String jsonString;
   serializeJson(doc, jsonString);
