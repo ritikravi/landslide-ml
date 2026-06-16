@@ -59,29 +59,29 @@ const Analytics = () => {
               }}
             />
             <Legend />
-            <Bar dataKey="moisture" fill="#3b82f6" name="Soil Moisture (%)" />
-            <Bar dataKey="water" fill="#06b6d4" name="Water Level (cm)" />
-            <Bar dataKey="tilt" fill="#eab308" name="Tilt (° x10)" />
+            <Bar dataKey="moisture" fill="#3b82f6" name="Soil Moisture (%)" radius={[8, 8, 0, 0]} />
+            <Bar dataKey="water" fill="#06b6d4" name="Water Level (cm)" radius={[8, 8, 0, 0]} />
+            <Bar dataKey="tilt" fill="#eab308" name="Tilt (° x10)" radius={[8, 8, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-dark-card border border-dark-border rounded-lg p-6">
-          <h4 className="text-gray-400 mb-2">Total Readings</h4>
-          <p className="text-3xl font-bold">{totalCount}</p>
+        <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 border-2 border-blue-500/50 rounded-xl p-6 hover:scale-105 transition-transform">
+          <h4 className="text-blue-400 font-bold text-lg mb-2">Total Readings</h4>
+          <p className="text-5xl font-bold text-white">{totalCount}</p>
         </div>
-        <div className="bg-dark-card border border-dark-border rounded-lg p-6">
-          <h4 className="text-gray-400 mb-2">Avg Soil Moisture</h4>
-          <p className="text-3xl font-bold">
+        <div className="bg-gradient-to-br from-green-500/20 to-green-600/10 border-2 border-green-500/50 rounded-xl p-6 hover:scale-105 transition-transform">
+          <h4 className="text-green-400 font-bold text-lg mb-2">Avg Soil Moisture</h4>
+          <p className="text-5xl font-bold text-white">
             {history.length > 0
               ? (history.reduce((sum, item) => sum + item.soilMoisture, 0) / history.length).toFixed(1)
               : '--'}%
           </p>
         </div>
-        <div className="bg-dark-card border border-dark-border rounded-lg p-6">
-          <h4 className="text-gray-400 mb-2">Max Tilt</h4>
-          <p className="text-3xl font-bold">
+        <div className="bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 border-2 border-yellow-500/50 rounded-xl p-6 hover:scale-105 transition-transform">
+          <h4 className="text-yellow-400 font-bold text-lg mb-2">Max Tilt</h4>
+          <p className="text-5xl font-bold text-white">
             {history.length > 0
               ? Math.max(...history.map(item => item.tilt || 0)).toFixed(2)
               : '--'}°
