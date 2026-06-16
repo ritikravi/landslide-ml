@@ -145,6 +145,12 @@ const Dashboard = () => {
           title="Vibration Activity"
           color="#ef4444"
         />
+        <SensorChart
+          data={history}
+          dataKey="ultrasonicDistance"
+          title="Distance Trend"
+          color="#a855f7"
+        />
       </div>
     </div>
   );
