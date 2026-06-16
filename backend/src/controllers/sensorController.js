@@ -76,6 +76,9 @@ export const getSensorHistory = async (req, res, next) => {
       if (endDate) query.timestamp.$lte = new Date(endDate);
     }
 
+    // Get total count
+    const totalCount = await SensorData.countDocuments(query);
+
     const history = await SensorData.find(query)
       .sort({ timestamp: -1 })
       .limit(parseInt(limit));
@@ -83,6 +86,7 @@ export const getSensorHistory = async (req, res, next) => {
     res.json({
       success: true,
       count: history.length,
+      total: totalCount,
       data: history
     });
   } catch (error) {

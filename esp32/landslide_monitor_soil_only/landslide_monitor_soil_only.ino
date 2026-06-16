@@ -1,12 +1,11 @@
 /*
- * ESP32 Landslide Monitoring - MPU6050 Diagnostic
- * Tests multiple GPIO pins to find MPU6050
+ * ESP32 Landslide Monitoring System
+ * Full sensor suite with cloud upload
  */
 
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
-#include <Wire.h>
 #include <TinyGPS++.h>
 
 const char* ssid = "Ritik";
@@ -20,164 +19,38 @@ const char* serverUrl = "https://landslide-api.onrender.com/api/sensor-data";
 #define GPS_TX_PIN 17      // GPS RX connects to ESP32 GPIO17
 #define TRIG_PIN 25        // Ultrasonic TRIG
 #define ECHO_PIN 26        // Ultrasonic ECHO
-const int MPU_ADDR = 0x68;
 
 unsigned long lastSendTime = 0;
 const unsigned long sendInterval = 30000;
 bool firstRun = true;
 int vibrationCount = 0;  // Count vibrations in 30-second window
 
-int SDA_PIN = 21;
-int SCL_PIN = 22;
-bool mpu6050Found = false;
-
 TinyGPSPlus gps;
 HardwareSerial gpsSerial(2);  // Use UART2
-
-bool scanI2C() {
-  byte error, address;
-  int nDevices = 0;
-  
-  for(address = 1; address < 127; address++) {
-    Wire.beginTransmission(address);
-    error = Wire.endTransmission();
-    
-    if (error == 0) {
-      Serial.print("  ✅ Device at 0x");
-      if (address < 16) Serial.print("0");
-      Serial.print(address, HEX);
-      if (address == 0x68 || address == 0x69) {
-        Serial.print(" <- MPU6050!");
-        mpu6050Found = true;
-      }
-      Serial.println();
-      nDevices++;
-    }
-  }
-  
-  return (nDevices > 0);
-}
-
-void testPinConfiguration(int sda, int scl) {
-  Serial.print("Testing SDA=GPIO");
-  Serial.print(sda);
-  Serial.print(", SCL=GPIO");
-  Serial.println(scl);
-  
-  Wire.end();
-  delay(100);
-  Wire.begin(sda, scl);
-  delay(100);
-  
-  if (scanI2C()) {
-    Serial.println("✅ FOUND MPU6050!");
-    SDA_PIN = sda;
-    SCL_PIN = scl;
-  } else {
-    Serial.println("❌ Nothing found\n");
-  }
-}
 
 void setup() {
   Serial.begin(115200);
   delay(1000);
   
+  Serial.println("\n========================================");
+  Serial.println("🌋 ESP32 Landslide Monitor Starting...");
+  Serial.println("========================================\n");
+  
   // Setup vibration sensor pin
   pinMode(VIBRATION_PIN, INPUT);
+  Serial.println("✅ Vibration sensor initialized (GPIO27)");
   
   // Setup ultrasonic sensor pins
   pinMode(TRIG_PIN, OUTPUT);
   pinMode(ECHO_PIN, INPUT);
-  Serial.println("📏 Ultrasonic sensor initialized on GPIO25/26");
+  Serial.println("✅ Ultrasonic sensor initialized (GPIO25/26)");
   
-  // Setup GPS - Try standard configuration first
+  // Setup GPS
   gpsSerial.begin(9600, SERIAL_8N1, GPS_RX_PIN, GPS_TX_PIN);
-  Serial.println("🛰️  GPS module initialized on GPIO16(RX)/GPIO17(TX)");
-  Serial.println("⏳ Testing GPS for 5 seconds...");
+  Serial.println("✅ GPS module initialized (GPIO16/17)");
+  Serial.println("⏳ Testing GPS for 5 seconds...\n");
   
-  Serial.println("\n\n========================================");
-  Serial.println("🔧 MPU6050 DIAGNOSTIC MODE");
-  Serial.println("========================================\n");
-  
-  // Test many pin combinations
-  Serial.println("Testing all possible I2C pin combinations...\n");
-  
-  // Standard pins
-  testPinConfiguration(21, 22);
-  if (mpu6050Found) goto found;
-  
-  testPinConfiguration(22, 21);
-  if (mpu6050Found) goto found;
-  
-  // Alternative common pins
-  testPinConfiguration(18, 19);
-  if (mpu6050Found) goto found;
-  
-  testPinConfiguration(19, 18);
-  if (mpu6050Found) goto found;
-  
-  testPinConfiguration(16, 17);
-  if (mpu6050Found) goto found;
-  
-  testPinConfiguration(17, 16);
-  if (mpu6050Found) goto found;
-  
-  testPinConfiguration(4, 5);
-  if (mpu6050Found) goto found;
-  
-  testPinConfiguration(5, 4);
-  if (mpu6050Found) goto found;
-  
-  testPinConfiguration(13, 14);
-  if (mpu6050Found) goto found;
-  
-  testPinConfiguration(14, 13);
-  if (mpu6050Found) goto found;
-  
-  testPinConfiguration(25, 26);
-  if (mpu6050Found) goto found;
-  
-  testPinConfiguration(26, 25);
-  if (mpu6050Found) goto found;
-  
-  testPinConfiguration(32, 33);
-  if (mpu6050Found) goto found;
-  
-  testPinConfiguration(33, 32);
-  if (mpu6050Found) goto found;
-  
-  Serial.println("========================================");
-  Serial.println("❌ MPU6050 NOT FOUND ON ANY PINS!");
-  Serial.println("========================================");
-  Serial.println("\nPossible causes:");
-  Serial.println("1. MPU6050 sensor is damaged/faulty");
-  Serial.println("2. SCL wire is broken internally");
-  Serial.println("3. SDA wire is broken internally");
-  Serial.println("4. MPU6050 AD0 pin affects address (try 0x69)");
-  Serial.println("5. Breadboard connections are loose");
-  Serial.println("\nContinuing with soil sensor only...\n");
-  
-  Wire.begin(21, 22); // Default for other operations
-  goto skip;
-  
-found:
-  Serial.println("\n========================================");
-  Serial.println("✅ SUCCESS!");
-  Serial.print("✅ MPU6050 found on SDA=GPIO");
-  Serial.print(SDA_PIN);
-  Serial.print(", SCL=GPIO");
-  Serial.println(SCL_PIN);
-  Serial.println("========================================\n");
-  
-  // Initialize MPU6050
-  Wire.beginTransmission(MPU_ADDR);
-  Wire.write(0x6B);
-  Wire.write(0);
-  Wire.endTransmission(true);
-  delay(100);
-  
-skip:
-  // Test GPS for 5 seconds to see if we're getting data
+  // Test GPS for 5 seconds
   unsigned long gpsTestStart = millis();
   int charsReceived = 0;
   
@@ -189,32 +62,24 @@ skip:
     }
   }
   
-  Serial.println("\n========================================");
+  Serial.println("========================================");
   Serial.println("🛰️  GPS CONNECTION TEST");
   Serial.println("========================================");
   Serial.print("Characters received: ");
   Serial.println(charsReceived);
   
   if (charsReceived == 0) {
-    Serial.println("\n❌ NO DATA from GPS!");
-    Serial.println("\n⚠️  TX/RX might be SWAPPED!");
-    Serial.println("Try swapping the wires:");
-    Serial.println("  GPS TX → ESP32 GPIO17 (instead of GPIO16)");
-    Serial.println("  GPS RX → ESP32 GPIO16 (instead of GPIO17)");
-    Serial.println("\nOR check:");
-    Serial.println("  1. GPS VCC connected to 5V");
-    Serial.println("  2. GPS GND connected to GND");
-    Serial.println("  3. Wires are not broken");
-    Serial.println("  4. GPS module LED is blinking");
+    Serial.println("❌ GPS: No data (check wiring or go outside)");
   } else {
-    Serial.println("\n✅ GPS is sending data!");
-    Serial.print("Sentences processed: ");
+    Serial.println("✅ GPS: Receiving data!");
+    Serial.print("Sentences: ");
     Serial.println(gps.sentencesWithFix());
-    Serial.println("\nGPS hardware OK. Move outside for satellite lock.");
   }
   Serial.println("========================================\n");
   
   connectWiFi();
+  
+  Serial.println("🚀 System ready! Reading sensors...\n");
 }
 
 void connectWiFi() {
@@ -257,46 +122,6 @@ float readUltrasonicDistance() {
   return distance;
 }
 
-void readMPU6050(float &tiltX, float &tiltY) {
-  if (!mpu6050Found) {
-    tiltX = 0;
-    tiltY = 0;
-    return;
-  }
-  
-  Wire.beginTransmission(MPU_ADDR);
-  Wire.write(0x3B);
-  byte error = Wire.endTransmission(false);
-  
-  if (error != 0) {
-    tiltX = 0;
-    tiltY = 0;
-    return;
-  }
-  
-  Wire.requestFrom(MPU_ADDR, 6, true);
-  
-  if (Wire.available() < 6) {
-    tiltX = 0;
-    tiltY = 0;
-    return;
-  }
-  
-  int16_t accX = Wire.read() << 8 | Wire.read();
-  int16_t accY = Wire.read() << 8 | Wire.read();
-  int16_t accZ = Wire.read() << 8 | Wire.read();
-  
-  Serial.print("Raw: X=");
-  Serial.print(accX);
-  Serial.print(" Y=");
-  Serial.print(accY);
-  Serial.print(" Z=");
-  Serial.println(accZ);
-  
-  tiltX = atan2(accY, accZ) * 180.0 / PI;
-  tiltY = atan2(-accX, sqrt(accY * accY + accZ * accZ)) * 180.0 / PI;
-}
-
 void loop() {
   // Read GPS data
   while (gpsSerial.available() > 0) {
@@ -327,10 +152,6 @@ void loop() {
   if (vibrationDetected) {
     vibrationCount++;
   }
-  
-  float tiltX, tiltY;
-  readMPU6050(tiltX, tiltY);
-  float tiltAngle = sqrt(tiltX * tiltX + tiltY * tiltY);
   
   // Get GPS data
   float latitude = 0.0;
@@ -390,27 +211,12 @@ void loop() {
     Serial.println(" fixes)");
   }
   
-  if (mpu6050Found) {
-    Serial.print("Tilt X: ");
-    Serial.print(tiltX, 2);
-    Serial.println("°");
-    Serial.print("Tilt Y: ");
-    Serial.print(tiltY, 2);
-    Serial.println("°");
-    Serial.print("Angle: ");
-    Serial.print(tiltAngle, 2);
-    Serial.println("°");
-  } else {
-    Serial.println("Tilt: N/A (sensor not found)");
-  }
-  
   Serial.println("-------------------------\n");
   
   unsigned long currentTime = millis();
   if (firstRun || (currentTime - lastSendTime >= sendInterval)) {
     if (WiFi.status() == WL_CONNECTED) {
-      // Send the vibration count from the 30-second window
-      sendDataToCloud(soilMoisture, waterLevel, tiltAngle, vibrationCount, latitude, longitude, distance);
+      sendDataToCloud(soilMoisture, waterLevel, vibrationCount, latitude, longitude, distance);
       
       // Reset count after sending
       vibrationCount = 0;
@@ -423,7 +229,7 @@ void loop() {
   delay(2000);
 }
 
-void sendDataToCloud(float soilMoisture, float waterLevel, float tilt, int vibration, float latitude, float longitude, float distance) {
+void sendDataToCloud(float soilMoisture, float waterLevel, int vibration, float latitude, float longitude, float distance) {
   Serial.println("📡 Sending to cloud...");
   
   HTTPClient http;
@@ -434,12 +240,17 @@ void sendDataToCloud(float soilMoisture, float waterLevel, float tilt, int vibra
   StaticJsonDocument<300> doc;
   doc["soilMoisture"] = soilMoisture;
   doc["waterLevel"] = waterLevel;
-  doc["tilt"] = tilt;
+  doc["tilt"] = 0;  // Tilt sensor disabled
   doc["vibration"] = vibration;
   
   // Send distance if valid
   if (distance > 0) {
     doc["distance"] = distance;
+    Serial.print("📏 Including distance: ");
+    Serial.print(distance);
+    Serial.println(" cm");
+  } else {
+    Serial.println("⚠️  Distance invalid, not sending");
   }
   
   // Only send GPS if we have a valid fix
@@ -450,6 +261,9 @@ void sendDataToCloud(float soilMoisture, float waterLevel, float tilt, int vibra
   
   String jsonString;
   serializeJson(doc, jsonString);
+  
+  Serial.print("📤 JSON payload: ");
+  Serial.println(jsonString);
   
   int httpResponseCode = http.POST(jsonString);
   

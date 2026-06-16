@@ -4,6 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 const Analytics = () => {
   const [history, setHistory] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [timeRange, setTimeRange] = useState('24h');
 
   useEffect(() => {
@@ -15,6 +16,7 @@ const Analytics = () => {
       const limit = timeRange === '24h' ? 100 : timeRange === '7d' ? 500 : 1000;
       const res = await sensorAPI.getHistory({ limit });
       setHistory(res.data.data);
+      setTotalCount(res.data.total || res.data.count);
     } catch (error) {
       console.error('Error fetching history:', error);
     }
@@ -67,7 +69,7 @@ const Analytics = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-dark-card border border-dark-border rounded-lg p-6">
           <h4 className="text-gray-400 mb-2">Total Readings</h4>
-          <p className="text-3xl font-bold">{history.length}</p>
+          <p className="text-3xl font-bold">{totalCount}</p>
         </div>
         <div className="bg-dark-card border border-dark-border rounded-lg p-6">
           <h4 className="text-gray-400 mb-2">Avg Soil Moisture</h4>
