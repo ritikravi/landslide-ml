@@ -32,23 +32,23 @@ const RiskIndicator = ({ riskLevel, riskScore }) => {
   const Icon = config.icon;
 
   return (
-    <div className={`${config.bgColor} border border-current rounded-lg p-6`}>
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold">Landslide Risk Assessment</h3>
-        <Icon className={`w-8 h-8 ${config.color}`} />
+    <div className={`${config.bgColor} border-2 border-current rounded-xl p-8`}>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-white">Landslide Risk Assessment</h2>
+        <Icon className={`w-12 h-12 ${config.color}`} />
       </div>
-      <div className="space-y-2">
-        <div className="flex items-baseline space-x-3">
-          <span className="text-4xl font-bold">{riskScore ?? '--'}</span>
-          <span className="text-gray-400">/100</span>
+      <div className="space-y-4">
+        <div className="flex items-baseline space-x-4">
+          <span className="text-7xl font-bold text-white">{riskScore ?? '--'}</span>
+          <span className="text-3xl text-gray-400">/100</span>
         </div>
-        <div className={`inline-block px-3 py-1 rounded-full ${config.bgColor} ${config.color} text-sm font-medium`}>
+        <div className={`inline-block px-6 py-3 rounded-full ${config.bgColor} ${config.color} text-xl font-bold border-2 border-current`}>
           {config.label}
         </div>
       </div>
-      <div className="mt-4 w-full bg-gray-700 rounded-full h-2">
+      <div className="mt-6 w-full bg-gray-700 rounded-full h-4">
         <div
-          className={`h-2 rounded-full ${config.color} bg-current transition-all duration-500`}
+          className={`h-4 rounded-full ${config.color} bg-current transition-all duration-500`}
           style={{ width: `${riskScore || 0}%` }}
         />
       </div>

@@ -6,6 +6,7 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
+#include <Wire.h>
 #include <TinyGPS++.h>
 
 const char* ssid = "Ritik";
@@ -19,6 +20,9 @@ const char* serverUrl = "https://landslide-api.onrender.com/api/sensor-data";
 #define GPS_TX_PIN 17      // GPS RX connects to ESP32 GPIO17
 #define TRIG_PIN 25        // Ultrasonic TRIG
 #define ECHO_PIN 26        // Ultrasonic ECHO
+#define SDA_PIN 21         // MPU6050 SDA
+#define SCL_PIN 22         // MPU6050 SCL
+const int MPU_ADDR = 0x68;
 
 unsigned long lastSendTime = 0;
 const unsigned long sendInterval = 30000;
@@ -35,6 +39,19 @@ void setup() {
   Serial.println("\n========================================");
   Serial.println("🌋 ESP32 Landslide Monitor Starting...");
   Serial.println("========================================\n");
+  
+  // Setup MPU6050
+  Wire.begin(SDA_PIN, SCL_PIN);
+  Wire.beginTransmission(MPU_ADDR);
+  Wire.write(0x6B);  // Power management register
+  Wire.write(0);     // Wake up MPU6050
+  byte error = Wire.endTransmission(true);
+  
+  if (error == 0) {
+    Serial.println("✅ MPU6050 tilt sensor initialized (GPIO21/22)");
+  } else {
+    Serial.println("⚠️  MPU6050 not found - continuing without tilt");
+  }
   
   // Setup vibration sensor pin
   pinMode(VIBRATION_PIN, INPUT);
@@ -122,6 +139,37 @@ float readUltrasonicDistance() {
   return distance;
 }
 
+void readMPU6050(float &pitch, float &roll) {
+  Wire.beginTransmission(MPU_ADDR);
+  Wire.write(0x3B);  // Accelerometer start register
+  byte error = Wire.endTransmission(false);
+  
+  if (error != 0) {
+    pitch = 0;
+    roll = 0;
+    return;
+  }
+  
+  Wire.requestFrom(MPU_ADDR, 6, true);
+  
+  if (Wire.available() < 6) {
+    pitch = 0;
+    roll = 0;
+    return;
+  }
+  
+  int16_t AcX = Wire.read() << 8 | Wire.read();
+  int16_t AcY = Wire.read() << 8 | Wire.read();
+  int16_t AcZ = Wire.read() << 8 | Wire.read();
+  
+  float ax = AcX / 16384.0;
+  float ay = AcY / 16384.0;
+  float az = AcZ / 16384.0;
+  
+  pitch = atan2(ay, az) * 180.0 / PI;
+  roll = atan2(-ax, sqrt(ay * ay + az * az)) * 180.0 / PI;
+}
+
 void loop() {
   // Read GPS data
   while (gpsSerial.available() > 0) {
@@ -152,6 +200,11 @@ void loop() {
   if (vibrationDetected) {
     vibrationCount++;
   }
+  
+  // Read MPU6050 tilt sensor
+  float pitch, roll;
+  readMPU6050(pitch, roll);
+  float tiltAngle = sqrt(pitch * pitch + roll * roll);
   
   // Get GPS data
   float latitude = 0.0;
@@ -211,12 +264,20 @@ void loop() {
     Serial.println(" fixes)");
   }
   
+  Serial.print("Tilt - Pitch: ");
+  Serial.print(pitch, 2);
+  Serial.print("°  Roll: ");
+  Serial.print(roll, 2);
+  Serial.print("°  Angle: ");
+  Serial.print(tiltAngle, 2);
+  Serial.println("°");
+  
   Serial.println("-------------------------\n");
   
   unsigned long currentTime = millis();
   if (firstRun || (currentTime - lastSendTime >= sendInterval)) {
     if (WiFi.status() == WL_CONNECTED) {
-      sendDataToCloud(soilMoisture, waterLevel, vibrationCount, latitude, longitude, distance);
+      sendDataToCloud(soilMoisture, waterLevel, tiltAngle, vibrationCount, latitude, longitude, distance);
       
       // Reset count after sending
       vibrationCount = 0;
@@ -229,7 +290,7 @@ void loop() {
   delay(2000);
 }
 
-void sendDataToCloud(float soilMoisture, float waterLevel, int vibration, float latitude, float longitude, float distance) {
+void sendDataToCloud(float soilMoisture, float waterLevel, float tilt, int vibration, float latitude, float longitude, float distance) {
   Serial.println("📡 Sending to cloud...");
   
   HTTPClient http;
@@ -240,7 +301,7 @@ void sendDataToCloud(float soilMoisture, float waterLevel, int vibration, float 
   StaticJsonDocument<300> doc;
   doc["soilMoisture"] = soilMoisture;
   doc["waterLevel"] = waterLevel;
-  doc["tilt"] = 0;  // Tilt sensor disabled
+  doc["tilt"] = tilt;
   doc["vibration"] = vibration;
   
   // Send distance if valid
