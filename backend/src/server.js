@@ -18,6 +18,10 @@ dotenv.config();
 
 const app = express();
 const httpServer = createServer(app);
+
+// Trust proxy for Render.com deployment
+app.set('trust proxy', true);
+
 const io = new Server(httpServer, {
   cors: {
     origin: '*',

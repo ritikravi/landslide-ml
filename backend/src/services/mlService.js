@@ -9,6 +9,9 @@ export class MLService {
    */
   async getPredictionFromModel(sensorData) {
     try {
+      console.log(`🤖 Calling ML API at: ${ML_API_URL}/predict`);
+      console.log(`📊 Sending data:`, sensorData);
+      
       const response = await axios.post(`${ML_API_URL}/predict`, {
         soilMoisture: sensorData.soilMoisture,
         waterLevel: sensorData.waterLevel || 0,
@@ -16,16 +19,27 @@ export class MLService {
         vibration: sensorData.vibration || 0,
         ultrasonicDistance: sensorData.ultrasonicDistance || 0
       }, {
-        timeout: 5000
+        timeout: 10000, // Increased to 10 seconds for Render cold starts
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
       
       if (response.data.success) {
+        console.log(`✅ ML API responded: ${response.data.prediction.riskLevel} (${response.data.prediction.confidence}% confidence)`);
         return response.data.prediction;
       }
       
       throw new Error('ML API returned unsuccessful response');
     } catch (error) {
-      console.warn('ML API unavailable, using fallback calculation:', error.message);
+      console.error(`❌ ML API Error: ${error.message}`);
+      if (error.response) {
+        console.error(`   Status: ${error.response.status}`);
+        console.error(`   Data:`, error.response.data);
+      } else if (error.request) {
+        console.error(`   No response received from ${ML_API_URL}`);
+      }
+      console.warn('⚠️  Using fallback calculation instead');
       return this.fallbackCalculation(sensorData);
     }
   }
@@ -150,6 +164,12 @@ export class MLService {
     const riskLevel = mlPrediction.riskLevel;
     const features = this.extractFeatures(sensorData, previousData);
 
+    // Determine which model was used based on confidence
+    // ML API returns 95%+ confidence, fallback returns 75%
+    const modelUsed = mlPrediction.confidence >= 90 ? 'RandomForest' : 'Fallback';
+    
+    console.log(`📈 Saving prediction: ${riskLevel} (score: ${riskScore}, confidence: ${mlPrediction.confidence}%, model: ${modelUsed})`);
+
     const prediction = new MLPrediction({
       riskScore,
       riskLevel,
@@ -157,7 +177,7 @@ export class MLService {
       features: {
         ...features,
         confidence: mlPrediction.confidence,
-        modelUsed: mlPrediction.confidence > 80 ? 'RandomForest' : 'Fallback'
+        modelUsed
       }
     });
 
