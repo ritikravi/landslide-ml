@@ -15,7 +15,7 @@ const Layout = ({ children }) => {
     <div className="min-h-screen bg-dark-bg text-white">
       {/* Header */}
       <header className="bg-dark-card border-b border-dark-border">
-        <div className="container mx-auto px-4 py-4">
+        <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <Activity className="w-8 h-8 text-blue-500" />
@@ -35,7 +35,7 @@ const Layout = ({ children }) => {
 
       {/* Navigation */}
       <nav className="bg-dark-card border-b border-dark-border">
-        <div className="container mx-auto px-4">
+        <div className="px-6">
           <div className="flex space-x-1">
             {navItems.map(({ path, label, icon: Icon }) => (
               <Link
@@ -56,7 +56,7 @@ const Layout = ({ children }) => {
       </nav>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">
+      <main className="px-6 py-6">
         {children}
       </main>
     </div>
