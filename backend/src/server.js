@@ -35,10 +35,14 @@ app.use(cors());  // Allow all origins for now
 app.use(express.json());
 app.use(morgan('dev'));
 
-// Rate limiting
+// Rate limiting with proper trust proxy configuration
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: 100
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  // Trust X-Forwarded-For from Render proxy
+  validate: { trustProxy: false }
 });
 app.use('/api', limiter);
 
