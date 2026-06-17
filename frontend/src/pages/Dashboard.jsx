@@ -3,6 +3,7 @@ import { useSocket } from '../context/SocketContext';
 import { sensorAPI, mlAPI } from '../services/api';
 import StatCard from '../components/StatCard';
 import RiskIndicator from '../components/RiskIndicator';
+import MLStatusBox from '../components/MLStatusBox';
 import { Droplets, TrendingUp, Navigation, Activity, Waves, Ruler } from 'lucide-react';
 import SensorChart from '../components/SensorChart';
 
@@ -67,11 +68,18 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      {/* Risk Indicator */}
-      <RiskIndicator
-        riskLevel={prediction?.riskLevel}
-        riskScore={prediction?.riskScore}
-      />
+      {/* Risk Indicator and ML Status */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <RiskIndicator
+            riskLevel={prediction?.riskLevel}
+            riskScore={prediction?.riskScore}
+          />
+        </div>
+        <div>
+          <MLStatusBox prediction={prediction} />
+        </div>
+      </div>
 
       {/* Sensor Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
