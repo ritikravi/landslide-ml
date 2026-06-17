@@ -28,6 +28,27 @@ def load_model():
         print(f"❌ Model file not found: {MODEL_PATH}")
         return False
 
+@app.route('/', methods=['GET'])
+def home():
+    """Root endpoint - API info"""
+    return jsonify({
+        'name': 'Landslide ML Prediction API',
+        'version': '1.0.0',
+        'status': 'operational',
+        'model': 'Random Forest Classifier',
+        'accuracy': '98.79%',
+        'endpoints': {
+            'health': '/health',
+            'predict': '/predict (POST)',
+            'retrain': '/retrain (POST)'
+        },
+        'usage': {
+            'example': 'POST /predict with JSON body',
+            'required_fields': ['soilMoisture', 'waterLevel', 'tilt', 'vibration'],
+            'optional_fields': ['ultrasonicDistance']
+        }
+    })
+
 @app.route('/health', methods=['GET'])
 def health():
     """Health check endpoint"""
