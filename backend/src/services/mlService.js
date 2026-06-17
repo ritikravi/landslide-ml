@@ -83,6 +83,7 @@ export class MLService {
       riskScore: finalScore,
       confidence: 75, // Lower confidence for fallback
       features: sensorData
+      // NO featureImportance - this marks it as fallback
     };
   }
 
@@ -164,9 +165,10 @@ export class MLService {
     const riskLevel = mlPrediction.riskLevel;
     const features = this.extractFeatures(sensorData, previousData);
 
-    // Determine which model was used based on confidence
-    // ML API returns 95%+ confidence, fallback returns 75%
-    const modelUsed = mlPrediction.confidence >= 90 ? 'RandomForest' : 'Fallback';
+    // Check if prediction came from ML API or fallback
+    // ML API includes featureImportance, fallback doesn't
+    const isMLModel = mlPrediction.featureImportance !== undefined;
+    const modelUsed = isMLModel ? 'RandomForest' : 'Fallback';
     
     console.log(`📈 Saving prediction: ${riskLevel} (score: ${riskScore}, confidence: ${mlPrediction.confidence}%, model: ${modelUsed})`);
 
