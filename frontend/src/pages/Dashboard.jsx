@@ -69,14 +69,14 @@ const Dashboard = () => {
   return (
     <div className="space-y-6 max-w-full">
       {/* Risk Indicator and ML Status */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-3">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div>
           <RiskIndicator
             riskLevel={prediction?.riskLevel}
             riskScore={prediction?.riskScore}
           />
         </div>
-        <div className="lg:col-span-1">
+        <div>
           <MLStatusBox prediction={prediction} />
         </div>
       </div>
