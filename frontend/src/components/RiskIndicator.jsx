@@ -32,7 +32,7 @@ const RiskIndicator = ({ riskLevel, riskScore }) => {
   const Icon = config.icon;
 
   return (
-    <div className={`${config.bgColor} border-2 border-current rounded-xl p-8`}>
+    <div className={`${config.bgColor} border-2 border-current rounded-xl p-8 h-full`}>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-white uppercase tracking-wide">Landslide Risk Assessment</h2>
         <Icon className={`w-12 h-12 ${config.color}`} />
