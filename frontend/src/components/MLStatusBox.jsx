@@ -54,13 +54,13 @@ export default function MLStatusBox({ prediction }) {
   };
 
   return (
-    <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-      <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+    <div className="bg-slate-800 rounded-xl p-8 border border-slate-700 h-full flex flex-col">
+      <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
         <Zap className="w-5 h-5 text-yellow-400" />
         ML PIPELINE STATUS
       </h3>
       
-      <div className="space-y-3">
+      <div className="space-y-3 flex-1">
         {steps.map((step, index) => {
           const Icon = step.icon;
           return (
@@ -95,34 +95,32 @@ export default function MLStatusBox({ prediction }) {
       </div>
 
       {/* Model info */}
-      {prediction?.features && (
-        <div className="mt-4 pt-4 border-t border-slate-700">
-          <div className="grid grid-cols-2 gap-3 text-xs">
-            <div>
-              <span className="text-gray-400">Model:</span>
-              <p className={`font-bold ${prediction.features.modelUsed === 'RandomForest' ? 'text-green-400' : 'text-yellow-400'}`}>
-                {prediction.features.modelUsed}
-              </p>
-            </div>
-            <div>
-              <span className="text-gray-400">Confidence:</span>
-              <p className="font-bold text-white">{prediction.features.confidence}%</p>
-            </div>
-            <div>
-              <span className="text-gray-400">Accuracy:</span>
-              <p className="font-bold text-white">
-                {prediction.features.modelUsed === 'RandomForest' ? '98.79%' : 'N/A'}
-              </p>
-            </div>
-            <div>
-              <span className="text-gray-400">Updated:</span>
-              <p className="font-bold text-white">
-                {new Date(prediction.timestamp).toLocaleTimeString()}
-              </p>
-            </div>
+      <div className="mt-4 pt-4 border-t border-slate-700">
+        <div className="grid grid-cols-2 gap-3 text-xs">
+          <div>
+            <span className="text-gray-400">Model:</span>
+            <p className={`font-bold ${prediction?.features?.modelUsed === 'RandomForest' ? 'text-green-400' : 'text-yellow-400'}`}>
+              {prediction?.features?.modelUsed || 'Loading...'}
+            </p>
+          </div>
+          <div>
+            <span className="text-gray-400">Confidence:</span>
+            <p className="font-bold text-white">{prediction?.features?.confidence || '--'}%</p>
+          </div>
+          <div>
+            <span className="text-gray-400">Accuracy:</span>
+            <p className="font-bold text-white">
+              {prediction?.features?.modelUsed === 'RandomForest' ? '98.79%' : 'N/A'}
+            </p>
+          </div>
+          <div>
+            <span className="text-gray-400">Updated:</span>
+            <p className="font-bold text-white">
+              {prediction?.timestamp ? new Date(prediction.timestamp).toLocaleTimeString() : '--:--:--'}
+            </p>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
