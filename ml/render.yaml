@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: landslide-ml-api
+    env: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    region: oregon
+    plan: free
+    envVars:
+      - key: ML_API_PORT
+        value: 5001
+      - key: PYTHON_VERSION
+        value: 3.11
