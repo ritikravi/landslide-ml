@@ -13,6 +13,7 @@ import { setupSocketHandlers } from './socket/socketHandler.js';
 import sensorRoutes from './routes/sensorRoutes.js';
 import alertRoutes from './routes/alertRoutes.js';
 import mlRoutes from './routes/mlRoutes.js';
+import powerbiRoutes from './routes/powerbiRoutes.js';
 
 dotenv.config();
 
@@ -56,6 +57,7 @@ app.use((req, res, next) => {
 app.use('/api', sensorRoutes);
 app.use('/api', alertRoutes);
 app.use('/api', mlRoutes);
+app.use('/api/powerbi', powerbiRoutes); // Power BI integration routes
 
 // Health check
 app.get('/health', (req, res) => {
