@@ -63,40 +63,40 @@ export default function MLStatusBox({ prediction }) {
 
   return (
     <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-xl p-8 border-2 border-slate-700 h-full flex flex-col shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 backdrop-blur-sm">
-      <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-        <Zap className="w-5 h-5 text-yellow-400 animate-pulse" />
+      <h3 className="text-2xl font-bold text-white mb-8 flex items-center gap-3 uppercase tracking-wide">
+        <Zap className="w-7 h-7 text-yellow-400 animate-pulse" />
         ML PIPELINE STATUS
       </h3>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-1">
         {/* Pipeline Steps */}
-        <div className="space-y-3">
+        <div className="space-y-4">
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
-              <div key={step.id} className="flex items-start gap-3">
+              <div key={step.id} className="flex items-start gap-4">
                 {/* Step number with line */}
                 <div className="flex flex-col items-center">
-                  <div className={`w-8 h-8 rounded-full ${getStatusBg(step.status)} flex items-center justify-center transition-all duration-500 ${step.status === 'success' ? 'scale-110' : ''}`}>
-                    <Icon className={`w-4 h-4 ${getStatusColor(step.status)} ${step.status === 'success' ? 'animate-pulse' : ''}`} />
+                  <div className={`w-10 h-10 rounded-full ${getStatusBg(step.status)} flex items-center justify-center transition-all duration-500 ${step.status === 'success' ? 'scale-110' : ''}`}>
+                    <Icon className={`w-5 h-5 ${getStatusColor(step.status)} ${step.status === 'success' ? 'animate-pulse' : ''}`} />
                   </div>
                   {index < steps.length - 1 && (
-                    <div className={`w-0.5 h-6 transition-all duration-500 ${step.status === 'success' ? 'bg-green-500/30' : 'bg-gray-600'}`} />
+                    <div className={`w-0.5 h-8 transition-all duration-500 ${step.status === 'success' ? 'bg-green-500/30' : 'bg-gray-600'}`} />
                   )}
                 </div>
 
                 {/* Step info */}
                 <div className="flex-1 pt-1">
                   <div className="flex items-center justify-between">
-                    <span className={`font-medium ${step.status === 'success' ? 'text-white' : 'text-gray-400'}`}>
+                    <span className={`font-semibold text-base ${step.status === 'success' ? 'text-white' : 'text-gray-400'}`}>
                       {step.name}
                     </span>
                     {step.status === 'success' && (
-                      <span className="text-xs text-green-400">✓</span>
+                      <span className="text-sm text-green-400">✓</span>
                     )}
                   </div>
                   {step.detail && (
-                    <p className="text-xs text-gray-400 mt-0.5">{step.detail}</p>
+                    <p className="text-sm text-gray-400 mt-1">{step.detail}</p>
                   )}
                 </div>
               </div>
@@ -105,15 +105,15 @@ export default function MLStatusBox({ prediction }) {
         </div>
 
         {/* Forecast Timeline */}
-        <div className="flex flex-col justify-center gap-3">
+        <div className="flex flex-col justify-center gap-4">
           {forecastData.length > 0 ? (
             <div 
               onClick={handleChartClick}
-              className="cursor-pointer hover:scale-[1.02] transition-transform duration-300 space-y-3"
+              className="cursor-pointer hover:scale-[1.02] transition-transform duration-300 space-y-4"
             >
-              <div className="text-center mb-2">
-                <h4 className="text-sm font-bold text-white flex items-center justify-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-purple-400" />
+              <div className="text-center mb-3">
+                <h4 className="text-base font-bold text-white flex items-center justify-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-purple-400" />
                   Future Risk Forecast
                 </h4>
                 <p className="text-xs text-gray-400 mt-1">Click to view details</p>
@@ -134,24 +134,24 @@ export default function MLStatusBox({ prediction }) {
                 return (
                   <div 
                     key={index}
-                    className={`bg-gradient-to-br ${colorClass} border rounded-lg p-3 hover:shadow-lg transition-all duration-300`}
+                    className={`bg-gradient-to-br ${colorClass} border rounded-xl p-4 hover:shadow-lg transition-all duration-300`}
                   >
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <Clock className="w-3 h-3" />
-                        <span className="text-xs font-bold text-white">{timeLabels[index]}</span>
+                        <Clock className="w-4 h-4" />
+                        <span className="text-sm font-bold text-white">{timeLabels[index]}</span>
                       </div>
-                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${colorClass.split(' ')[0]} border`}>
+                      <span className={`text-sm font-bold px-3 py-1 rounded-full ${colorClass.split(' ')[0]} border`}>
                         {forecast.riskLevel}
                       </span>
                     </div>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-bold text-white">{forecast.riskScore}</span>
-                      <span className="text-xs text-gray-400">/100</span>
+                    <div className="flex items-baseline gap-2 mb-3">
+                      <span className="text-3xl font-bold text-white">{forecast.riskScore}</span>
+                      <span className="text-sm text-gray-400">/100</span>
                     </div>
-                    <div className="mt-2 bg-gray-700/30 rounded-full h-1.5 overflow-hidden">
+                    <div className="mt-3 bg-gray-700/30 rounded-full h-2 overflow-hidden">
                       <div
-                        className={`h-1.5 rounded-full transition-all duration-1000 ${
+                        className={`h-2 rounded-full transition-all duration-1000 ${
                           forecast.riskLevel === 'CRITICAL' ? 'bg-red-500' :
                           forecast.riskLevel === 'HIGH' ? 'bg-orange-500' :
                           forecast.riskLevel === 'MEDIUM' ? 'bg-yellow-500' :
@@ -160,7 +160,7 @@ export default function MLStatusBox({ prediction }) {
                         style={{ width: `${forecast.riskScore}%` }}
                       />
                     </div>
-                    <div className="flex justify-between mt-2 text-xs text-gray-400">
+                    <div className="flex justify-between mt-3 text-sm text-gray-400">
                       <span>Confidence: {forecast.confidence}%</span>
                     </div>
                   </div>
@@ -168,10 +168,10 @@ export default function MLStatusBox({ prediction }) {
               })}
             </div>
           ) : (
-            <div className="text-center text-gray-400 py-8">
-              <TrendingUp className="w-12 h-12 mx-auto mb-2 opacity-30" />
-              <p className="text-sm">No forecast data available</p>
-              <p className="text-xs mt-1">Collecting sensor readings...</p>
+            <div className="text-center text-gray-400 py-12">
+              <TrendingUp className="w-16 h-16 mx-auto mb-3 opacity-30" />
+              <p className="text-base font-medium">No forecast data available</p>
+              <p className="text-sm mt-2">Collecting sensor readings...</p>
             </div>
           )}
         </div>
