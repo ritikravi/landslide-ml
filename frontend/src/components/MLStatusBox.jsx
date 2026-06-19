@@ -71,34 +71,40 @@ export default function MLStatusBox({ prediction }) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-1">
         {/* Pipeline Steps */}
         <div className="space-y-4">
-          {steps.map((step, index) => {
+          {steps.map((step) => {
             const Icon = step.icon;
+            const stepColors = {
+              'success': 'from-green-500/20 to-green-500/5 border-green-500/50',
+              'warning': 'from-yellow-500/20 to-yellow-500/5 border-yellow-500/50',
+              'error': 'from-red-500/20 to-red-500/5 border-red-500/50',
+              'waiting': 'from-gray-500/20 to-gray-500/5 border-gray-500/50'
+            };
+            
+            const colorClass = stepColors[step.status] || stepColors.waiting;
+            
             return (
-              <div key={step.id} className="flex items-start gap-4">
-                {/* Step number with line */}
-                <div className="flex flex-col items-center">
-                  <div className={`w-10 h-10 rounded-full ${getStatusBg(step.status)} flex items-center justify-center transition-all duration-500 ${step.status === 'success' ? 'scale-110' : ''}`}>
-                    <Icon className={`w-5 h-5 ${getStatusColor(step.status)} ${step.status === 'success' ? 'animate-pulse' : ''}`} />
-                  </div>
-                  {index < steps.length - 1 && (
-                    <div className={`w-0.5 h-8 transition-all duration-500 ${step.status === 'success' ? 'bg-green-500/30' : 'bg-gray-600'}`} />
-                  )}
-                </div>
-
-                {/* Step info */}
-                <div className="flex-1 pt-1">
-                  <div className="flex items-center justify-between">
+              <div 
+                key={step.id}
+                className={`bg-gradient-to-br ${colorClass} border rounded-xl p-4 hover:shadow-lg transition-all duration-300`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full ${getStatusBg(step.status)} flex items-center justify-center`}>
+                      <Icon className={`w-5 h-5 ${getStatusColor(step.status)} ${step.status === 'success' ? 'animate-pulse' : ''}`} />
+                    </div>
                     <span className={`font-semibold text-base ${step.status === 'success' ? 'text-white' : 'text-gray-400'}`}>
                       {step.name}
                     </span>
-                    {step.status === 'success' && (
-                      <span className="text-sm text-green-400">✓</span>
-                    )}
                   </div>
-                  {step.detail && (
-                    <p className="text-sm text-gray-400 mt-1">{step.detail}</p>
+                  {step.status === 'success' && (
+                    <span className="text-lg text-green-400">✓</span>
                   )}
                 </div>
+                {step.detail && (
+                  <div className="ml-[52px]">
+                    <p className="text-sm text-gray-300 font-medium">{step.detail}</p>
+                  </div>
+                )}
               </div>
             );
           })}
