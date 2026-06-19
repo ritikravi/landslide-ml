@@ -213,6 +213,12 @@ export class MLService {
     if (mlPrediction.featureImportance) {
       features.featureImportance = mlPrediction.featureImportance;
     }
+    if (mlPrediction.anomaly) {
+      features.anomaly = mlPrediction.anomaly;
+      if (mlPrediction.anomaly.isAnomaly) {
+        console.log(`🚨 Anomaly detected! Severity: ${mlPrediction.anomaly.severity}, Patterns: ${mlPrediction.anomaly.patterns?.length}`);
+      }
+    }
     
     console.log(`📈 Saving prediction: ${riskLevel} (score: ${riskScore}, confidence: ${mlPrediction.confidence}%, model: ${modelUsed})`);
 

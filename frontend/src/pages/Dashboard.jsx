@@ -6,6 +6,7 @@ import RiskIndicator from '../components/RiskIndicator';
 import MLStatusBox from '../components/MLStatusBox';
 import GPSMap from '../components/GPSMap';
 import NewsTicker from '../components/NewsTicker';
+import AnomalyDetector from '../components/AnomalyDetector';
 import { Droplets, TrendingUp, Navigation, Activity, Waves, Ruler } from 'lucide-react';
 import SensorChart from '../components/SensorChart';
 
@@ -89,49 +90,16 @@ const Dashboard = () => {
 
       {/* Sensor Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <StatCard
-          title="Soil Moisture"
-          value={sensorData?.soilMoisture?.toFixed(1)}
-          unit="%"
-          icon={Droplets}
-          color="blue"
-        />
-        <StatCard
-          title="Water Level"
-          value={sensorData?.waterLevel?.toFixed(1)}
-          unit="cm"
-          icon={Waves}
-          color="cyan"
-        />
-        <StatCard
-          title="Tilt Angle"
-          value={sensorData?.tilt?.toFixed(2)}
-          unit="°"
-          icon={TrendingUp}
-          color="yellow"
-        />
-        <StatCard
-          title="Vibration"
-          value={sensorData?.vibration > 0 ? sensorData.vibration : 'None'}
-          unit={sensorData?.vibration > 0 ? 'events' : ''}
-          icon={Activity}
-          color={sensorData?.vibration > 0 ? 'red' : 'gray'}
-        />
-        <StatCard
-          title="Distance"
-          value={sensorData?.ultrasonicDistance?.toFixed(1)}
-          unit="cm"
-          icon={Ruler}
-          color="purple"
-        />
-        <StatCard
-          title="GPS Status"
-          value={sensorData?.latitude ? 'Active' : 'N/A'}
-          unit=""
-          icon={Navigation}
-          color="green"
-        />
+        <StatCard title="Soil Moisture" value={sensorData?.soilMoisture?.toFixed(1)} unit="%" icon={Droplets} color="blue" />
+        <StatCard title="Water Level" value={sensorData?.waterLevel?.toFixed(1)} unit="cm" icon={Waves} color="cyan" />
+        <StatCard title="Tilt Angle" value={sensorData?.tilt?.toFixed(2)} unit="°" icon={TrendingUp} color="yellow" />
+        <StatCard title="Vibration" value={sensorData?.vibration > 0 ? sensorData.vibration : 'None'} unit={sensorData?.vibration > 0 ? 'events' : ''} icon={Activity} color={sensorData?.vibration > 0 ? 'red' : 'gray'} />
+        <StatCard title="Distance" value={sensorData?.ultrasonicDistance?.toFixed(1)} unit="cm" icon={Ruler} color="purple" />
+        <StatCard title="GPS Status" value={sensorData?.latitude ? 'Active' : 'N/A'} unit="" icon={Navigation} color="green" />
       </div>
+
+      {/* Anomaly Detection */}
+      <AnomalyDetector prediction={prediction} />
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

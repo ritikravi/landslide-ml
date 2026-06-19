@@ -12,6 +12,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY ml_api.py .
 COPY trend_forecasting.py .
 COPY landslide_model.pkl .
+COPY anomaly_model.pkl .
+COPY anomaly_scaler.pkl .
+COPY anomaly_thresholds.pkl .
 
 # Expose port
 EXPOSE 5001

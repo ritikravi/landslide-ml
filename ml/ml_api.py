@@ -18,18 +18,35 @@ CORS(app)
 
 # Load the trained model
 MODEL_PATH = 'landslide_model.pkl'
+ANOMALY_MODEL_PATH  = 'anomaly_model.pkl'
+ANOMALY_SCALER_PATH = 'anomaly_scaler.pkl'
+ANOMALY_THRESH_PATH = 'anomaly_thresholds.pkl'
+
 model = None
+anomaly_model = None
+anomaly_scaler = None
+anomaly_thresholds = None
 forecaster = TrendForecaster()
 
 def load_model():
-    global model
+    global model, anomaly_model, anomaly_scaler, anomaly_thresholds
+
     if os.path.exists(MODEL_PATH):
         model = joblib.load(MODEL_PATH)
-        print(f"✅ Model loaded from {MODEL_PATH}")
-        return True
+        print(f"✅ RandomForest model loaded from {MODEL_PATH}")
     else:
         print(f"❌ Model file not found: {MODEL_PATH}")
         return False
+
+    if os.path.exists(ANOMALY_MODEL_PATH):
+        anomaly_model    = joblib.load(ANOMALY_MODEL_PATH)
+        anomaly_scaler   = joblib.load(ANOMALY_SCALER_PATH)
+        anomaly_thresholds = joblib.load(ANOMALY_THRESH_PATH)
+        print(f"✅ Anomaly Detection model loaded")
+    else:
+        print(f"⚠️  Anomaly model not found — run train_anomaly_model.py")
+
+    return True
 
 @app.route('/', methods=['GET'])
 def home():
@@ -58,8 +75,103 @@ def health():
     return jsonify({
         'status': 'healthy',
         'model_loaded': model is not None,
+        'anomaly_model_loaded': anomaly_model is not None,
         'model_path': MODEL_PATH
     })
+
+def detect_anomaly(current_data, history=None):
+    """
+    Run anomaly detection on current reading + optional history context.
+    Returns anomaly score, severity label, and detected patterns.
+    """
+    if anomaly_model is None:
+        return None
+
+    # Build feature row (same as training)
+    soil   = current_data.get('soilMoisture', 0)
+    water  = current_data.get('waterLevel', 0)
+    tilt   = current_data.get('tilt', 0)
+    vib    = current_data.get('vibration', 0)
+    dist   = current_data.get('ultrasonicDistance', 0)
+
+    # Rate-of-change features from history
+    soil_delta  = 0
+    water_delta = 0
+    tilt_delta  = 0
+    soil_roll_dev  = 0
+    water_roll_dev = 0
+
+    if history and len(history) >= 2:
+        prev = history[-1]
+        soil_delta  = abs(soil  - prev.get('soilMoisture', soil))
+        water_delta = abs(water - prev.get('waterLevel', water))
+        tilt_delta  = abs(tilt  - prev.get('tilt', tilt))
+
+    if history and len(history) >= 5:
+        recent_soil  = [r.get('soilMoisture', 0) for r in history[-5:]]
+        recent_water = [r.get('waterLevel', 0)   for r in history[-5:]]
+        soil_roll_dev  = abs(soil  - np.mean(recent_soil))
+        water_roll_dev = abs(water - np.mean(recent_water))
+
+    combined_risk = (
+        (soil  / 100) * 0.35 +
+        (water / 100) * 0.35 +
+        (tilt  / 90 ) * 0.20 +
+        min(vib / 10, 1.0)    * 0.10
+    )
+
+    features = np.array([[
+        soil, water, tilt, vib, dist,
+        soil_delta, water_delta, tilt_delta,
+        soil_roll_dev, water_roll_dev,
+        combined_risk
+    ]])
+
+    features_scaled = anomaly_scaler.transform(features)
+    prediction      = anomaly_model.predict(features_scaled)[0]   # 1=normal, -1=anomaly
+    score           = float(anomaly_model.decision_function(features_scaled)[0])
+
+    is_anomaly = (prediction == -1)
+
+    # Severity based on calibrated thresholds
+    if score < anomaly_thresholds['high']:
+        severity = 'HIGH'
+    elif score < anomaly_thresholds['medium']:
+        severity = 'MEDIUM'
+    elif score < anomaly_thresholds['low']:
+        severity = 'LOW'
+    else:
+        severity = 'NORMAL'
+
+    # Identify which patterns triggered the anomaly
+    triggered_patterns = []
+    if soil_delta > 15:
+        triggered_patterns.append(f'Sudden soil moisture spike (+{soil_delta:.1f}%)')
+    if water_delta > 20:
+        triggered_patterns.append(f'Rapid water level change (+{water_delta:.1f}cm)')
+    if tilt_delta > 3:
+        triggered_patterns.append(f'Sudden tilt change (+{tilt_delta:.2f}°)')
+    if soil_roll_dev > 20:
+        triggered_patterns.append(f'Soil moisture {soil_roll_dev:.1f}% above rolling average')
+    if water_roll_dev > 25:
+        triggered_patterns.append(f'Water level {water_roll_dev:.1f}cm above rolling average')
+    if tilt > 15:
+        triggered_patterns.append(f'Tilt angle {tilt:.2f}° exceeds safe threshold')
+    if vib > 5:
+        triggered_patterns.append(f'High vibration count: {vib} events in window')
+    if combined_risk > 0.7:
+        triggered_patterns.append('Multi-sensor combined risk pattern elevated')
+
+    return {
+        'isAnomaly': is_anomaly,
+        'score': round(score, 4),
+        'severity': severity,
+        'patterns': triggered_patterns if triggered_patterns else (['Unusual sensor reading pattern detected'] if is_anomaly else []),
+        'description': (
+            'Unusual sensor pattern detected — conditions differ significantly from historical baseline.' if is_anomaly
+            else 'Sensor readings within normal historical patterns.'
+        )
+    }
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -154,6 +266,20 @@ def predict():
                 'featureImportance': feature_importance
             }
         }
+
+        # Run anomaly detection
+        current_data_for_anomaly = {
+            'soilMoisture': data.get('soilMoisture', 0),
+            'waterLevel': data.get('waterLevel', 0),
+            'tilt': data.get('tilt', 0),
+            'vibration': data.get('vibration', 0),
+            'ultrasonicDistance': data.get('ultrasonicDistance', 0)
+        }
+        anomaly_result = detect_anomaly(current_data_for_anomaly, data.get('history', []))
+        if anomaly_result:
+            response['prediction']['anomaly'] = anomaly_result
+            if anomaly_result['isAnomaly']:
+                print(f"🚨 Anomaly detected! Severity: {anomaly_result['severity']}, Score: {anomaly_result['score']}")
         
         # Add trend analysis and forecasting if history provided
         history = data.get('history', [])
