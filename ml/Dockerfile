@@ -10,6 +10,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application files
 COPY ml_api.py .
+COPY trend_forecasting.py .
 COPY landslide_model.pkl .
 
 # Expose port
