@@ -51,11 +51,6 @@ const RiskIndicator = ({ riskLevel, riskScore, sensorData }) => {
     const tilt = sensorData?.tilt ?? null;
     const distance = sensorData?.ultrasonicDistance ?? null;
 
-    const getStatus = (condition) => {
-      if (condition === null) return 'unknown';
-      return condition ? 'safe' : 'danger';
-    };
-
     return [
       {
         icon: Droplets,
@@ -94,6 +89,79 @@ const RiskIndicator = ({ riskLevel, riskScore, sensorData }) => {
       }
     ];
   };
+
+  // Real-world recommended actions based on USGS & Japan emergency protocols
+  const getRecommendedAction = () => {
+    const soil = sensorData?.soilMoisture ?? 0;
+    const water = sensorData?.waterLevel ?? 0;
+    const vibration = sensorData?.vibration ?? 0;
+    const tilt = sensorData?.tilt ?? 0;
+
+    if (riskLevel === 'CRITICAL') {
+      return {
+        level: 'CRITICAL',
+        color: 'border-red-500 bg-red-500/10',
+        titleColor: 'text-red-400',
+        icon: '🚨',
+        title: 'EVACUATE IMMEDIATELY',
+        actions: [
+          'Leave the area now — do not wait for official orders',
+          'Move sideways away from the slide path, never run uphill or downhill',
+          'Alert neighbors and call emergency services (112 / local disaster cell)',
+          'Do not re-enter the zone until authorities declare it safe'
+        ]
+      };
+    }
+
+    if (riskLevel === 'HIGH') {
+      return {
+        level: 'HIGH',
+        color: 'border-orange-500 bg-orange-500/10',
+        titleColor: 'text-orange-400',
+        icon: '⚠️',
+        title: 'PREPARE TO EVACUATE',
+        actions: [
+          vibration > 0 ? 'Ground vibration detected — stay away from slopes and cliffs' : 'Monitor slope areas closely — avoid unnecessary outdoor activity',
+          water > 80 ? 'Water level critical — move to higher ground immediately' : 'Prepare emergency kit: documents, water, food, torch, first aid',
+          soil > 80 ? 'Soil is heavily saturated — slope failure risk is high' : 'Identify and keep evacuation route clear',
+          'Alert local disaster management authority and stay by phone'
+        ]
+      };
+    }
+
+    if (riskLevel === 'MEDIUM') {
+      return {
+        level: 'MEDIUM',
+        color: 'border-yellow-500 bg-yellow-500/10',
+        titleColor: 'text-yellow-400',
+        icon: '🔔',
+        title: 'STAY ALERT',
+        actions: [
+          soil > 70 ? 'Soil moisture elevated — watch for cracks or bulges in ground' : 'Continue regular monitoring of sensor readings',
+          water > 60 ? 'Water level rising — check drainage channels near slopes' : 'Avoid construction or digging on or near slopes',
+          'Prepare go-bag with essentials in case rapid evacuation is needed',
+          'Watch for warning signs: cracking sounds, small rockfalls, tilting trees'
+        ]
+      };
+    }
+
+    // LOW risk — dynamic based on sensor context
+    return {
+      level: 'LOW',
+      color: 'border-green-500 bg-green-500/10',
+      titleColor: 'text-green-400',
+      icon: '✅',
+      title: 'ALL CLEAR — CONTINUE MONITORING',
+      actions: [
+        'All sensor readings are within safe thresholds',
+        'Inspect slope drainage systems and clear any blockages periodically',
+        'Check sensor calibration and ESP32 connectivity regularly',
+        'Review evacuation plan with household members as a precaution'
+      ]
+    };
+  };
+
+  const action = getRecommendedAction();
 
   const checks = getChecks();
 
@@ -172,6 +240,29 @@ const RiskIndicator = ({ riskLevel, riskScore, sensorData }) => {
             );
           })}
         </div>
+      </div>
+
+      {/* Recommended Action */}
+      <div className={`mt-5 rounded-xl border ${action.color} px-4 py-3`}>
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+          <ShieldAlert className="w-4 h-4" />
+          Recommended Action
+        </p>
+        <p className={`text-base font-bold mb-3 ${action.titleColor}`}>
+          {action.icon} {action.title}
+        </p>
+        <ul className="space-y-1.5">
+          {action.actions.map((item, i) => (
+            <li key={i} className="flex items-start gap-2 text-sm text-gray-200">
+              <span className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                action.level === 'CRITICAL' ? 'bg-red-400' :
+                action.level === 'HIGH'     ? 'bg-orange-400' :
+                action.level === 'MEDIUM'   ? 'bg-yellow-400' : 'bg-green-400'
+              } ${action.level !== 'LOW' ? 'animate-pulse' : ''}`} />
+              {item}
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
