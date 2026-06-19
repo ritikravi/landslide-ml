@@ -182,10 +182,11 @@ export default function MLStatusBox({ prediction }) {
       {/* Feature Importance */}
       {prediction?.features?.modelUsed === 'RandomForest' && (
         <div className="mt-6 pt-5 border-t border-slate-700/50">
-          <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+          <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-1 flex items-center gap-2">
             <Zap className="w-4 h-4 text-yellow-400" />
             What's Driving the Prediction
           </h4>
+          <p className="text-xs text-gray-400 mb-4">ML model weights learned from 825 real sensor readings</p>
           <div className="space-y-2.5">
             {(() => {
               const fi = prediction?.features?.featureImportance;
