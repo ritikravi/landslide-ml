@@ -173,7 +173,7 @@ const RiskIndicator = ({ riskLevel, riskScore, sensorData }) => {
   };
 
   return (
-    <div className={`${config.bgColor} bg-gradient-to-br ${config.gradient} border-2 ${config.borderColor} rounded-xl p-8 h-full shadow-2xl ${config.glowColor} backdrop-blur-sm transition-all duration-500`}>
+    <div className={`${config.bgColor} bg-gradient-to-br ${config.gradient} border-2 ${config.borderColor} rounded-xl p-8 h-full shadow-2xl ${config.glowColor} backdrop-blur-sm transition-all duration-500 flex flex-col`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-bold text-white uppercase tracking-wide">
@@ -219,19 +219,12 @@ const RiskIndicator = ({ riskLevel, riskScore, sensorData }) => {
                 key={check.label}
                 className={`flex items-center gap-3 px-3 py-2 rounded-lg border ${style.bg} transition-all duration-300`}
               >
-                {/* sensor icon */}
                 <SIcon className={`w-4 h-4 ${style.text} flex-shrink-0`} />
-
-                {/* label + desc */}
                 <div className="flex-1 min-w-0">
                   <span className="text-sm font-semibold text-white">{check.label}</span>
                   <span className="text-xs text-gray-400 ml-2">{check.desc}</span>
                 </div>
-
-                {/* value */}
                 <span className={`text-sm font-bold ${style.text} flex-shrink-0`}>{check.value}</span>
-
-                {/* status icon with pulsing dot */}
                 <div className="relative flex-shrink-0">
                   <StatusIcon className={`w-4 h-4 ${style.text}`} />
                   <span className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full ${style.dot} ${check.status !== 'safe' ? 'animate-ping' : ''}`} />
@@ -242,19 +235,19 @@ const RiskIndicator = ({ riskLevel, riskScore, sensorData }) => {
         </div>
       </div>
 
-      {/* Recommended Action */}
-      <div className={`mt-5 rounded-xl border ${action.color} px-4 py-3`}>
+      {/* Recommended Action — flex-1 so it fills all remaining space */}
+      <div className={`mt-5 rounded-xl border ${action.color} px-5 py-4 flex-1 flex flex-col`}>
         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-2">
           <ShieldAlert className="w-4 h-4" />
           Recommended Action
         </p>
-        <p className={`text-base font-bold mb-3 ${action.titleColor}`}>
+        <p className={`text-base font-bold mb-4 ${action.titleColor}`}>
           {action.icon} {action.title}
         </p>
-        <ul className="space-y-1.5">
+        <ul className="space-y-3 flex-1">
           {action.actions.map((item, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm text-gray-200">
-              <span className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+            <li key={i} className="flex items-start gap-3 text-sm text-gray-200">
+              <span className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${
                 action.level === 'CRITICAL' ? 'bg-red-400' :
                 action.level === 'HIGH'     ? 'bg-orange-400' :
                 action.level === 'MEDIUM'   ? 'bg-yellow-400' : 'bg-green-400'
