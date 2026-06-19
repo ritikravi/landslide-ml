@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSocket } from '../context/SocketContext';
 import { sensorAPI, mlAPI } from '../services/api';
-import { TrendingUp, TrendingDown, Minus, Clock, AlertTriangle, Brain, Activity, Calendar, Target } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Clock, AlertTriangle, Brain, Activity, Calendar, Target, Zap, ShieldAlert, ShieldCheck, Search } from 'lucide-react';
 
 const Predictions = () => {
   const { latestData } = useSocket();
@@ -130,8 +130,25 @@ const Predictions = () => {
           <h1 className="text-3xl font-bold text-white uppercase tracking-wide">AI-Powered Risk Predictions</h1>
         </div>
         <p className="text-gray-300">
-          Analyzing sensor trends to forecast future landslide risk levels using Random Forest ML model with 98.79% accuracy
+          Two ML models working together: <span className="text-green-400 font-semibold">Random Forest (98.79% accuracy)</span> for risk classification
+          and <span className="text-purple-400 font-semibold">Isolation Forest</span> for anomaly pattern detection.
         </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+          <div className="bg-green-500/10 border border-green-500/30 rounded-lg px-4 py-3 flex items-center gap-3">
+            <Zap className="w-5 h-5 text-green-400 flex-shrink-0" />
+            <div>
+              <p className="text-green-400 font-bold text-sm">Model 1 — Random Forest Classifier</p>
+              <p className="text-gray-400 text-xs mt-0.5">Predicts risk level (LOW/MEDIUM/HIGH/CRITICAL) with 98.79% accuracy. Trained on 825 real sensor readings. Forecasts 30min → 3hr ahead.</p>
+            </div>
+          </div>
+          <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg px-4 py-3 flex items-center gap-3">
+            <Search className="w-5 h-5 text-purple-400 flex-shrink-0" />
+            <div>
+              <p className="text-purple-400 font-bold text-sm">Model 2 — Isolation Forest (Anomaly Detection)</p>
+              <p className="text-gray-400 text-xs mt-0.5">Detects unusual sensor patterns that precede landslides — sudden spikes, sustained deviations, cross-sensor correlations. Flags 5% of readings as anomalous.</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Warnings Section */}
@@ -191,6 +208,95 @@ const Predictions = () => {
           </div>
         </div>
       </div>
+
+      {/* Anomaly Detection Model */}
+      {(() => {
+        const anomaly = prediction?.features?.anomaly;
+        const SEVERITY = {
+          HIGH:   { bg: 'bg-red-500/10',    border: 'border-red-500/60',    text: 'text-red-400',    dot: 'bg-red-400',    barColor: 'bg-red-500',    label: 'HIGH ANOMALY'   },
+          MEDIUM: { bg: 'bg-orange-500/10', border: 'border-orange-500/60', text: 'text-orange-400', dot: 'bg-orange-400', barColor: 'bg-orange-500', label: 'MEDIUM ANOMALY' },
+          LOW:    { bg: 'bg-yellow-500/10', border: 'border-yellow-500/60', text: 'text-yellow-400', dot: 'bg-yellow-400', barColor: 'bg-yellow-500', label: 'LOW ANOMALY'    },
+          NORMAL: { bg: 'bg-green-500/10',  border: 'border-green-500/60',  text: 'text-green-400',  dot: 'bg-green-400',  barColor: 'bg-green-500',  label: 'NORMAL'         },
+        };
+        const cfg = anomaly ? (SEVERITY[anomaly.severity] || SEVERITY.NORMAL) : null;
+        return (
+          <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-2 border-purple-500/30 rounded-xl p-6 shadow-xl">
+            <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2 uppercase tracking-wide">
+              <Search className="w-6 h-6 text-purple-400" />
+              Anomaly Detection Model
+              <span className="text-xs font-normal text-purple-400 bg-purple-500/20 border border-purple-500/30 px-2 py-0.5 rounded-full ml-2">Isolation Forest</span>
+            </h2>
+            <p className="text-gray-400 text-sm mb-5">
+              Pattern-based detection using 11 engineered features — finds unusual sensor combinations that simple thresholds miss.
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+              {[
+                { label: 'Raw Sensors', value: '5', desc: 'soil, water, tilt, vibration, distance', color: 'text-blue-400', bg: 'bg-blue-500/10' },
+                { label: 'Rate of Change', value: '3', desc: 'sudden spikes per reading', color: 'text-orange-400', bg: 'bg-orange-500/10' },
+                { label: 'Rolling Deviation', value: '2', desc: 'deviation from 5-reading average', color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
+                { label: 'Combined Risk', value: '1', desc: 'cross-sensor weighted score', color: 'text-red-400', bg: 'bg-red-500/10' },
+                { label: 'Training Data', value: '825', desc: 'real sensor readings', color: 'text-green-400', bg: 'bg-green-500/10' },
+                { label: 'Anomaly Rate', value: '5.1%', desc: 'flagged in training set', color: 'text-purple-400', bg: 'bg-purple-500/10' },
+              ].map(f => (
+                <div key={f.label} className={`${f.bg} border border-slate-600/50 rounded-xl p-3 text-center`}>
+                  <p className={`text-2xl font-bold ${f.color}`}>{f.value}</p>
+                  <p className="text-white font-semibold text-xs mt-1">{f.label}</p>
+                  <p className="text-gray-500 text-xs mt-0.5">{f.desc}</p>
+                </div>
+              ))}
+            </div>
+            {anomaly && cfg ? (
+              <div className={`${cfg.bg} border-2 ${cfg.border} rounded-xl p-5`}>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    {anomaly.isAnomaly ? <AlertTriangle className={`w-5 h-5 ${cfg.text} animate-pulse`} /> : <ShieldCheck className={`w-5 h-5 ${cfg.text}`} />}
+                    Current Reading Analysis
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    <span className={`w-3 h-3 rounded-full ${cfg.dot} ${anomaly.isAnomaly ? 'animate-ping' : ''}`} />
+                    <span className={`text-sm font-bold px-3 py-1 rounded-full border ${cfg.bg} ${cfg.border} ${cfg.text}`}>{cfg.label}</span>
+                  </div>
+                </div>
+                <div className="mb-4">
+                  <div className="flex justify-between text-xs text-gray-400 mb-2">
+                    <span>Anomaly Score</span>
+                    <span className={`font-bold ${cfg.text}`}>{anomaly.score}</span>
+                  </div>
+                  <div className="w-full bg-slate-700/50 rounded-full h-3 overflow-hidden">
+                    <div className={`h-3 rounded-full transition-all duration-1000 ${cfg.barColor}`}
+                      style={{ width: anomaly.isAnomaly ? `${Math.min(100, Math.abs(anomaly.score) * 600 + 25)}%` : '8%' }} />
+                  </div>
+                  <div className="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>Normal (0.24)</span><span>Threshold (0.06)</span><span>Anomalous (-0.18)</span>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-200 mb-4">{anomaly.description}</p>
+                {anomaly.patterns?.length > 0 && (
+                  <div>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1 mb-2">
+                      <ShieldAlert className="w-3.5 h-3.5" /> Detected Patterns
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {anomaly.patterns.map((p, i) => (
+                        <div key={i} className={`flex items-start gap-2 text-sm p-3 rounded-lg ${cfg.bg} border ${cfg.border}`}>
+                          <span className={`w-2 h-2 rounded-full flex-shrink-0 mt-1.5 ${cfg.dot} ${anomaly.isAnomaly ? 'animate-pulse' : ''}`} />
+                          <span className="text-gray-200">{p}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="bg-slate-700/30 border border-slate-600 rounded-xl p-6 text-center">
+                <Search className="w-10 h-10 text-purple-400 mx-auto mb-2 animate-pulse" />
+                <p className="text-white font-semibold">Waiting for next sensor reading</p>
+                <p className="text-gray-400 text-sm mt-1">Anomaly analysis runs on every ESP32 reading</p>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Sensor Trends Analysis */}
       <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-2 border-slate-700 rounded-xl p-6 shadow-xl">
