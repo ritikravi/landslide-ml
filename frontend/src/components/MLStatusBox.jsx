@@ -70,116 +70,112 @@ export default function MLStatusBox({ prediction }) {
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-1">
         {/* Pipeline Steps */}
-        <div className="space-y-4">
-          {steps.map((step) => {
-            const Icon = step.icon;
-            const stepColors = {
-              'success': 'from-green-500/20 to-green-500/5 border-green-500/50',
-              'warning': 'from-yellow-500/20 to-yellow-500/5 border-yellow-500/50',
-              'error': 'from-red-500/20 to-red-500/5 border-red-500/50',
-              'waiting': 'from-gray-500/20 to-gray-500/5 border-gray-500/50'
-            };
-            
-            const colorClass = stepColors[step.status] || stepColors.waiting;
-            
-            return (
-              <div 
-                key={step.id}
-                className={`bg-gradient-to-br ${colorClass} border rounded-xl p-4 hover:shadow-lg transition-all duration-300`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full ${getStatusBg(step.status)} flex items-center justify-center`}>
-                      <Icon className={`w-5 h-5 ${getStatusColor(step.status)} ${step.status === 'success' ? 'animate-pulse' : ''}`} />
+        <div className="flex flex-col">
+          <div className="mb-4">
+            <h4 className="text-base font-bold text-white flex items-center gap-2">
+              <Zap className="w-5 h-5 text-green-400" />
+              Pipeline Status
+            </h4>
+            <p className="text-xs text-gray-400 mt-1">Real-time processing steps</p>
+          </div>
+          <div className="space-y-4 flex-1">
+            {steps.map((step) => {
+              const Icon = step.icon;
+              const stepColors = {
+                'success': 'from-green-500/20 to-green-500/5 border-green-500/50',
+                'warning': 'from-yellow-500/20 to-yellow-500/5 border-yellow-500/50',
+                'error': 'from-red-500/20 to-red-500/5 border-red-500/50',
+                'waiting': 'from-gray-500/20 to-gray-500/5 border-gray-500/50'
+              };
+              
+              const colorClass = stepColors[step.status] || stepColors.waiting;
+              
+              return (
+                <div 
+                  key={step.id}
+                  className={`bg-gradient-to-br ${colorClass} border rounded-xl p-4 hover:shadow-lg transition-all duration-300 h-[72px] flex items-center`}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-full ${getStatusBg(step.status)} flex items-center justify-center flex-shrink-0`}>
+                        <Icon className={`w-5 h-5 ${getStatusColor(step.status)} ${step.status === 'success' ? 'animate-pulse' : ''}`} />
+                      </div>
+                      <div>
+                        <span className={`font-semibold text-base block ${step.status === 'success' ? 'text-white' : 'text-gray-400'}`}>
+                          {step.name}
+                        </span>
+                        {step.detail && (
+                          <p className="text-sm text-gray-300 font-medium">{step.detail}</p>
+                        )}
+                      </div>
                     </div>
-                    <span className={`font-semibold text-base ${step.status === 'success' ? 'text-white' : 'text-gray-400'}`}>
-                      {step.name}
-                    </span>
+                    {step.status === 'success' && (
+                      <span className="text-lg text-green-400 flex-shrink-0">✓</span>
+                    )}
                   </div>
-                  {step.status === 'success' && (
-                    <span className="text-lg text-green-400">✓</span>
-                  )}
                 </div>
-                {step.detail && (
-                  <div className="ml-[52px]">
-                    <p className="text-sm text-gray-300 font-medium">{step.detail}</p>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
         {/* Forecast Timeline */}
-        <div className="flex flex-col justify-center gap-4">
-          {forecastData.length > 0 ? (
-            <div 
-              onClick={handleChartClick}
-              className="cursor-pointer hover:scale-[1.02] transition-transform duration-300 space-y-4"
-            >
-              <div className="text-center mb-3">
-                <h4 className="text-base font-bold text-white flex items-center justify-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-purple-400" />
-                  Future Risk Forecast
-                </h4>
-                <p className="text-xs text-gray-400 mt-1">Click to view details</p>
-              </div>
-              
-              {/* Timeline Forecasts */}
-              {(prediction?.features?.forecasts || []).map((forecast, index) => {
-                const riskColors = {
-                  'LOW': 'from-green-500/20 to-green-500/5 border-green-500/50 text-green-400',
-                  'MEDIUM': 'from-yellow-500/20 to-yellow-500/5 border-yellow-500/50 text-yellow-400',
-                  'HIGH': 'from-orange-500/20 to-orange-500/5 border-orange-500/50 text-orange-400',
-                  'CRITICAL': 'from-red-500/20 to-red-500/5 border-red-500/50 text-red-400'
-                };
-                
-                const timeLabels = ['30 min', '1 hour', '2 hours'];
-                const colorClass = riskColors[forecast.riskLevel] || 'from-gray-500/20 to-gray-500/5 border-gray-500/50 text-gray-400';
-                
-                return (
-                  <div 
-                    key={index}
-                    className={`bg-gradient-to-br ${colorClass} border rounded-xl p-4 hover:shadow-lg transition-all duration-300`}
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4" />
-                        <span className="text-sm font-bold text-white">{timeLabels[index]}</span>
+        <div className="flex flex-col">
+          <div className="mb-4">
+            <h4 className="text-base font-bold text-white flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-purple-400" />
+              Future Risk Forecast
+            </h4>
+            <p className="text-xs text-gray-400 mt-1">Click to view details</p>
+          </div>
+          <div className="space-y-4 flex-1">
+            {forecastData.length > 0 ? (
+              <div 
+                onClick={handleChartClick}
+                className="cursor-pointer space-y-4"
+              >
+                {/* Timeline Forecasts */}
+                {(prediction?.features?.forecasts || []).map((forecast, index) => {
+                  const riskColors = {
+                    'LOW': 'from-green-500/20 to-green-500/5 border-green-500/50 text-green-400',
+                    'MEDIUM': 'from-yellow-500/20 to-yellow-500/5 border-yellow-500/50 text-yellow-400',
+                    'HIGH': 'from-orange-500/20 to-orange-500/5 border-orange-500/50 text-orange-400',
+                    'CRITICAL': 'from-red-500/20 to-red-500/5 border-red-500/50 text-red-400'
+                  };
+                  
+                  const timeLabels = ['30 min', '1 hour', '2 hours'];
+                  const colorClass = riskColors[forecast.riskLevel] || 'from-gray-500/20 to-gray-500/5 border-gray-500/50 text-gray-400';
+                  
+                  return (
+                    <div 
+                      key={index}
+                      className={`bg-gradient-to-br ${colorClass} border rounded-xl p-4 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 h-[72px] flex items-center`}
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center gap-3 flex-1">
+                          <Clock className="w-4 h-4 flex-shrink-0" />
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-sm font-bold text-white">{timeLabels[index]}</span>
+                            <span className="text-3xl font-bold text-white">{forecast.riskScore}</span>
+                            <span className="text-sm text-gray-400">/100</span>
+                          </div>
+                        </div>
+                        <span className={`text-sm font-bold px-3 py-1 rounded-full ${colorClass.split(' ')[0]} border flex-shrink-0`}>
+                          {forecast.riskLevel}
+                        </span>
                       </div>
-                      <span className={`text-sm font-bold px-3 py-1 rounded-full ${colorClass.split(' ')[0]} border`}>
-                        {forecast.riskLevel}
-                      </span>
                     </div>
-                    <div className="flex items-baseline gap-2 mb-3">
-                      <span className="text-3xl font-bold text-white">{forecast.riskScore}</span>
-                      <span className="text-sm text-gray-400">/100</span>
-                    </div>
-                    <div className="mt-3 bg-gray-700/30 rounded-full h-2 overflow-hidden">
-                      <div
-                        className={`h-2 rounded-full transition-all duration-1000 ${
-                          forecast.riskLevel === 'CRITICAL' ? 'bg-red-500' :
-                          forecast.riskLevel === 'HIGH' ? 'bg-orange-500' :
-                          forecast.riskLevel === 'MEDIUM' ? 'bg-yellow-500' :
-                          'bg-green-500'
-                        }`}
-                        style={{ width: `${forecast.riskScore}%` }}
-                      />
-                    </div>
-                    <div className="flex justify-between mt-3 text-sm text-gray-400">
-                      <span>Confidence: {forecast.confidence}%</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="text-center text-gray-400 py-12">
-              <TrendingUp className="w-16 h-16 mx-auto mb-3 opacity-30" />
-              <p className="text-base font-medium">No forecast data available</p>
-              <p className="text-sm mt-2">Collecting sensor readings...</p>
-            </div>
-          )}
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center text-gray-400 py-12 flex flex-col items-center justify-center h-full">
+                <TrendingUp className="w-16 h-16 mb-3 opacity-30" />
+                <p className="text-base font-medium">No forecast data available</p>
+                <p className="text-sm mt-2">Collecting sensor readings...</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
