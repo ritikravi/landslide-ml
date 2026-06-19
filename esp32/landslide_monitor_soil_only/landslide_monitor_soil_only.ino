@@ -186,13 +186,9 @@ void loop() {
   if (soilMoisture > 100) soilMoisture = 100;
   
   // Read water level sensor
-  // SENSOR REMOVED - Set to 0 to avoid random noise
-  float waterLevel = 0;  // Sensor disconnected
-  
-  // ORIGINAL CODE (when sensor connected):
-  // int waterRaw = analogRead(WATER_PIN);
-  // // INVERTED: High reading (dry) = 0%, Low reading (wet) = 100%
-  // float waterLevel = map(waterRaw, 4095, 0, 0, 100);  // Inverted mapping
+  int waterRaw = analogRead(WATER_PIN);
+  // INVERTED: High reading (dry) = 0%, Low reading (wet) = 100%
+  float waterLevel = map(waterRaw, 4095, 0, 0, 100);  // Inverted mapping
   if (waterLevel < 0) waterLevel = 0;
   if (waterLevel > 100) waterLevel = 100;
   

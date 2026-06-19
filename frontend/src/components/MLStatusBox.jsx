@@ -54,9 +54,9 @@ export default function MLStatusBox({ prediction }) {
   };
 
   return (
-    <div className="bg-slate-800 rounded-xl p-8 border border-slate-700 h-full flex flex-col">
+    <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-xl p-8 border-2 border-slate-700 h-full flex flex-col shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 backdrop-blur-sm">
       <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-        <Zap className="w-5 h-5 text-yellow-400" />
+        <Zap className="w-5 h-5 text-yellow-400 animate-pulse" />
         ML PIPELINE STATUS
       </h3>
       
@@ -67,11 +67,11 @@ export default function MLStatusBox({ prediction }) {
             <div key={step.id} className="flex items-start gap-3">
               {/* Step number with line */}
               <div className="flex flex-col items-center">
-                <div className={`w-8 h-8 rounded-full ${getStatusBg(step.status)} flex items-center justify-center`}>
-                  <Icon className={`w-4 h-4 ${getStatusColor(step.status)}`} />
+                <div className={`w-8 h-8 rounded-full ${getStatusBg(step.status)} flex items-center justify-center transition-all duration-500 ${step.status === 'success' ? 'scale-110' : ''}`}>
+                  <Icon className={`w-4 h-4 ${getStatusColor(step.status)} ${step.status === 'success' ? 'animate-pulse' : ''}`} />
                 </div>
                 {index < steps.length - 1 && (
-                  <div className={`w-0.5 h-6 ${step.status === 'success' ? 'bg-green-500/30' : 'bg-gray-600'}`} />
+                  <div className={`w-0.5 h-6 transition-all duration-500 ${step.status === 'success' ? 'bg-green-500/30' : 'bg-gray-600'}`} />
                 )}
               </div>
 
@@ -95,27 +95,27 @@ export default function MLStatusBox({ prediction }) {
       </div>
 
       {/* Model info */}
-      <div className="mt-4 pt-4 border-t border-slate-700">
+      <div className="mt-4 pt-4 border-t border-slate-700/50">
         <div className="grid grid-cols-2 gap-3 text-xs">
-          <div>
+          <div className="bg-slate-700/30 rounded-lg p-2">
             <span className="text-gray-400">Model:</span>
-            <p className={`font-bold ${prediction?.features?.modelUsed === 'RandomForest' ? 'text-green-400' : 'text-yellow-400'}`}>
+            <p className={`font-bold mt-1 ${prediction?.features?.modelUsed === 'RandomForest' ? 'text-green-400' : 'text-yellow-400'}`}>
               {prediction?.features?.modelUsed || 'Loading...'}
             </p>
           </div>
-          <div>
+          <div className="bg-slate-700/30 rounded-lg p-2">
             <span className="text-gray-400">Confidence:</span>
-            <p className="font-bold text-white">{prediction?.features?.confidence || '--'}%</p>
+            <p className="font-bold text-white mt-1">{prediction?.features?.confidence || '--'}%</p>
           </div>
-          <div>
+          <div className="bg-slate-700/30 rounded-lg p-2">
             <span className="text-gray-400">Accuracy:</span>
-            <p className="font-bold text-white">
+            <p className="font-bold text-white mt-1">
               {prediction?.features?.modelUsed === 'RandomForest' ? '98.79%' : 'N/A'}
             </p>
           </div>
-          <div>
+          <div className="bg-slate-700/30 rounded-lg p-2">
             <span className="text-gray-400">Updated:</span>
-            <p className="font-bold text-white">
+            <p className="font-bold text-white mt-1">
               {prediction?.timestamp ? new Date(prediction.timestamp).toLocaleTimeString() : '--:--:--'}
             </p>
           </div>

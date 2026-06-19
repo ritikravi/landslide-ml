@@ -67,16 +67,16 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-full">
+    <div className="space-y-6 max-w-full animate-fade-in">
       {/* Risk Indicator and ML Status */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-        <div className="w-full">
+        <div className="w-full transform transition-all duration-300 hover:scale-[1.02]">
           <RiskIndicator
             riskLevel={prediction?.riskLevel}
             riskScore={prediction?.riskScore}
           />
         </div>
-        <div className="w-full">
+        <div className="w-full transform transition-all duration-300 hover:scale-[1.02]">
           <MLStatusBox prediction={prediction} />
         </div>
       </div>
@@ -129,36 +129,46 @@ const Dashboard = () => {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <SensorChart
-          data={history}
-          dataKey="soilMoisture"
-          title="Soil Moisture Trend"
-          color="#3b82f6"
-        />
-        <SensorChart
-          data={history}
-          dataKey="waterLevel"
-          title="Water Level Trend"
-          color="#06b6d4"
-        />
-        <SensorChart
-          data={history}
-          dataKey="tilt"
-          title="Tilt Angle Trend"
-          color="#eab308"
-        />
-        <SensorChart
-          data={history}
-          dataKey="vibration"
-          title="Vibration Activity"
-          color="#ef4444"
-        />
-        <SensorChart
-          data={history}
-          dataKey="ultrasonicDistance"
-          title="Distance Trend"
-          color="#a855f7"
-        />
+        <div className="transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
+          <SensorChart
+            data={history}
+            dataKey="soilMoisture"
+            title="Soil Moisture Trend"
+            color="#3b82f6"
+          />
+        </div>
+        <div className="transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
+          <SensorChart
+            data={history}
+            dataKey="waterLevel"
+            title="Water Level Trend"
+            color="#06b6d4"
+          />
+        </div>
+        <div className="transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
+          <SensorChart
+            data={history}
+            dataKey="tilt"
+            title="Tilt Angle Trend"
+            color="#eab308"
+          />
+        </div>
+        <div className="transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
+          <SensorChart
+            data={history}
+            dataKey="vibration"
+            title="Vibration Activity"
+            color="#ef4444"
+          />
+        </div>
+        <div className="transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
+          <SensorChart
+            data={history}
+            dataKey="ultrasonicDistance"
+            title="Distance Trend"
+            color="#a855f7"
+          />
+        </div>
       </div>
     </div>
   );

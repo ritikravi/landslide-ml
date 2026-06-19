@@ -1,0 +1,8 @@
+metric,value
+totalPredictions,1000
+averageConfidence,25.97
+randomForestUsage,239
+fallbackUsage,69
+minRiskScore,1
+maxRiskScore,60
+avgRiskScore,19.39
