@@ -179,6 +179,37 @@ export default function MLStatusBox({ prediction }) {
         </div>
       </div>
 
+      {/* Feature Importance */}
+      {prediction?.features?.modelUsed === 'RandomForest' && (
+        <div className="mt-6 pt-5 border-t border-slate-700/50">
+          <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+            <Zap className="w-4 h-4 text-yellow-400" />
+            What's Driving the Prediction
+          </h4>
+          <div className="space-y-2.5">
+            {[
+              { label: 'Water Level',   icon: '🌊', value: 66.6, color: 'bg-cyan-400',   glow: 'shadow-cyan-400/40' },
+              { label: 'Soil Moisture', icon: '💧', value: 8.9,  color: 'bg-blue-400',   glow: 'shadow-blue-400/40' },
+              { label: 'Distance',      icon: '📏', value: 8.5,  color: 'bg-purple-400', glow: 'shadow-purple-400/40' },
+              { label: 'Tilt Angle',    icon: '📐', value: 8.0,  color: 'bg-yellow-400', glow: 'shadow-yellow-400/40' },
+              { label: 'Vibration',     icon: '⚡', value: 7.9,  color: 'bg-red-400',    glow: 'shadow-red-400/40' },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center gap-3">
+                <span className="text-base w-6 flex-shrink-0">{item.icon}</span>
+                <span className="text-xs text-gray-300 w-28 flex-shrink-0">{item.label}</span>
+                <div className="flex-1 bg-slate-700/50 rounded-full h-2.5 overflow-hidden">
+                  <div
+                    className={`h-2.5 rounded-full ${item.color} shadow-lg ${item.glow} transition-all duration-1000`}
+                    style={{ width: `${item.value}%` }}
+                  />
+                </div>
+                <span className="text-xs font-bold text-white w-12 text-right flex-shrink-0">{item.value}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Model info */}
       <div className="mt-4 pt-4 border-t border-slate-700/50">
         <div className="grid grid-cols-2 gap-3 text-xs">
