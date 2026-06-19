@@ -14,6 +14,7 @@ import sensorRoutes from './routes/sensorRoutes.js';
 import alertRoutes from './routes/alertRoutes.js';
 import mlRoutes from './routes/mlRoutes.js';
 import powerbiRoutes from './routes/powerbiRoutes.js';
+import newsRoutes from './routes/newsRoutes.js';
 
 dotenv.config();
 
@@ -57,7 +58,8 @@ app.use((req, res, next) => {
 app.use('/api', sensorRoutes);
 app.use('/api', alertRoutes);
 app.use('/api', mlRoutes);
-app.use('/api/powerbi', powerbiRoutes); // Power BI integration routes
+app.use('/api/powerbi', powerbiRoutes);
+app.use('/api', newsRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

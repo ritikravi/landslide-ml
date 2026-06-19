@@ -5,6 +5,7 @@ import StatCard from '../components/StatCard';
 import RiskIndicator from '../components/RiskIndicator';
 import MLStatusBox from '../components/MLStatusBox';
 import GPSMap from '../components/GPSMap';
+import NewsTicker from '../components/NewsTicker';
 import { Droplets, TrendingUp, Navigation, Activity, Waves, Ruler } from 'lucide-react';
 import SensorChart from '../components/SensorChart';
 
@@ -69,6 +70,9 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6 max-w-full animate-fade-in">
+      {/* Live News Ticker */}
+      <NewsTicker />
+
       {/* Risk Indicator and ML Status */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         <div className="w-full transform transition-all duration-300 hover:scale-[1.02]">
