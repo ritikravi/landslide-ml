@@ -163,7 +163,7 @@ def detect_anomaly(current_data, history=None):
         triggered_patterns.append('Multi-sensor combined risk pattern elevated')
 
     return {
-        'isAnomaly': is_anomaly,
+        'isAnomaly': bool(is_anomaly),
         'score': round(score, 4),
         'severity': severity,
         'patterns': triggered_patterns if triggered_patterns else (['Unusual sensor reading pattern detected'] if is_anomaly else []),

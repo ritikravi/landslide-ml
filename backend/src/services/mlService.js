@@ -34,7 +34,7 @@ export class MLService {
       }
       
       const response = await axios.post(`${ML_API_URL}/predict`, payload, {
-        timeout: 15000, // Increased to 15 seconds for trend analysis
+        timeout: 35000, // 35 seconds to handle Render free tier cold starts
         headers: {
           'Content-Type': 'application/json'
         }
