@@ -200,7 +200,7 @@ export class MLService {
     const isMLModel = mlPrediction.featureImportance !== undefined;
     const modelUsed = isMLModel ? 'RandomForest' : 'Fallback';
     
-    // Add trend data and forecasts to features
+    // Add trend data, forecasts, warnings, and featureImportance to features
     if (mlPrediction.trends) {
       features.trends = mlPrediction.trends;
     }
@@ -209,6 +209,9 @@ export class MLService {
     }
     if (mlPrediction.warnings) {
       features.warnings = mlPrediction.warnings;
+    }
+    if (mlPrediction.featureImportance) {
+      features.featureImportance = mlPrediction.featureImportance;
     }
     
     console.log(`📈 Saving prediction: ${riskLevel} (score: ${riskScore}, confidence: ${mlPrediction.confidence}%, model: ${modelUsed})`);
