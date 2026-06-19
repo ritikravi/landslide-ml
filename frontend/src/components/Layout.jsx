@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Activity, BarChart3, Bell, Brain } from 'lucide-react';
+import { Activity, BarChart3, Bell, Brain, Newspaper } from 'lucide-react';
 import ConnectionStatus from './ConnectionStatus';
 
 const Layout = ({ children }) => {
@@ -9,7 +9,8 @@ const Layout = ({ children }) => {
     { path: '/', label: 'Dashboard', icon: Activity },
     { path: '/predictions', label: 'Predictions', icon: Brain },
     { path: '/analytics', label: 'Analytics', icon: BarChart3 },
-    { path: '/alerts', label: 'Alerts', icon: Bell }
+    { path: '/alerts', label: 'Alerts', icon: Bell },
+    { path: '/news', label: 'Live News', icon: Newspaper },
   ];
 
   return (

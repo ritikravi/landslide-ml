@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Newspaper, ExternalLink, RefreshCw, AlertTriangle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Newspaper, RefreshCw, AlertTriangle } from 'lucide-react';
 import api from '../services/api';
 
 const NewsTicker = () => {
@@ -8,6 +9,7 @@ const NewsTicker = () => {
   const [error, setError] = useState(false);
   const [paused, setPaused] = useState(false);
   const scrollRef = useRef(null);
+  const navigate = useNavigate();
 
   const fetchNews = async () => {
     try {
@@ -46,8 +48,11 @@ const NewsTicker = () => {
     <div className="bg-gradient-to-r from-slate-800/90 to-slate-900/90 border-2 border-slate-700 rounded-xl overflow-hidden shadow-xl animate-fade-in">
       {/* Header bar */}
       <div className="flex items-center gap-0 h-10">
-        {/* Label */}
-        <div className="flex items-center gap-2 bg-red-600 px-4 h-full flex-shrink-0">
+        {/* Label — click to go to News page */}
+        <div
+          onClick={() => navigate('/news')}
+          className="flex items-center gap-2 bg-red-600 px-4 h-full flex-shrink-0 cursor-pointer hover:bg-red-700 transition-colors"
+        >
           <span className="w-2 h-2 bg-white rounded-full animate-ping" />
           <Newspaper className="w-4 h-4 text-white" />
           <span className="text-white font-bold text-xs uppercase tracking-wider">LIVE NEWS</span>
