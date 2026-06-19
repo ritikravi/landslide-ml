@@ -1,0 +1,11 @@
+DEPLOY TRIGGER - June 19, 2026
+
+This file triggers a new deployment to Render.
+
+Changes included:
+- trend_forecasting.py module added
+- ml_api.py updated with trend analysis
+- Forecasting for 30min, 1hr, 2hr ahead
+- Warning generation
+
+Commit and push this file to trigger Render auto-deploy.
