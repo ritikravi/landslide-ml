@@ -4,6 +4,7 @@ import { sensorAPI, mlAPI } from '../services/api';
 import StatCard from '../components/StatCard';
 import RiskIndicator from '../components/RiskIndicator';
 import MLStatusBox from '../components/MLStatusBox';
+import GPSMap from '../components/GPSMap';
 import { Droplets, TrendingUp, Navigation, Activity, Waves, Ruler } from 'lucide-react';
 import SensorChart from '../components/SensorChart';
 
@@ -169,6 +170,9 @@ const Dashboard = () => {
             title="Distance Trend"
             color="#a855f7"
           />
+        </div>
+        <div className="transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
+          <GPSMap sensorData={sensorData} />
         </div>
       </div>
     </div>
