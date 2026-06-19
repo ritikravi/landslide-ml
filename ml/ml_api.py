@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 ML Prediction API - Uses trained Random Forest model
-Receives sensor data and returns landslide risk prediction
+Receives sensor data and returns landslide risk prediction with trend forecasting
 """
 
 from flask import Flask, request, jsonify
@@ -10,6 +10,8 @@ import joblib
 import pandas as pd
 import numpy as np
 import os
+from datetime import datetime
+from trend_forecasting import TrendForecaster
 
 app = Flask(__name__)
 CORS(app)
@@ -17,6 +19,7 @@ CORS(app)
 # Load the trained model
 MODEL_PATH = 'landslide_model.pkl'
 model = None
+forecaster = TrendForecaster()
 
 def load_model():
     global model
@@ -61,7 +64,7 @@ def health():
 @app.route('/predict', methods=['POST'])
 def predict():
     """
-    Predict landslide risk from sensor data
+    Predict landslide risk from sensor data with trend forecasting
     
     Request body:
     {
@@ -69,7 +72,8 @@ def predict():
         "waterLevel": 22,
         "tilt": 0,
         "vibration": 0,
-        "ultrasonicDistance": 376
+        "ultrasonicDistance": 376,
+        "history": [...]  // Optional: for trend analysis
     }
     
     Response:
@@ -79,7 +83,10 @@ def predict():
             "riskLevel": "LOW",
             "riskScore": 15,
             "confidence": 95.5,
-            "features": {...}
+            "features": {...},
+            "trends": {...},
+            "forecasts": [...],
+            "warnings": [...]
         }
     }
     """
@@ -111,7 +118,7 @@ def predict():
             'ultrasonicDistance': data.get('ultrasonicDistance', 0)
         }])
         
-        # Make prediction
+        # Make current prediction
         prediction = model.predict(features)[0]
         probabilities = model.predict_proba(features)[0]
         confidence = float(max(probabilities) * 100)
@@ -137,7 +144,7 @@ def predict():
             'ultrasonicDistance': float(model.feature_importances_[4])
         }
         
-        return jsonify({
+        response = {
             'success': True,
             'prediction': {
                 'riskLevel': prediction,
@@ -146,9 +153,44 @@ def predict():
                 'features': data,
                 'featureImportance': feature_importance
             }
-        })
+        }
+        
+        # Add trend analysis and forecasting if history provided
+        history = data.get('history', [])
+        if history and len(history) >= forecaster.min_data_points:
+            # Parse timestamps
+            for reading in history:
+                if isinstance(reading.get('timestamp'), str):
+                    reading['timestamp'] = datetime.fromisoformat(reading['timestamp'].replace('Z', '+00:00'))
+            
+            # Analyze trends
+            trends = forecaster.analyze_sensor_trend(history)
+            
+            if trends:
+                # Generate forecasts
+                current_data = {
+                    'soilMoisture': data.get('soilMoisture', 0),
+                    'waterLevel': data.get('waterLevel', 0),
+                    'tilt': data.get('tilt', 0),
+                    'vibration': data.get('vibration', 0),
+                    'ultrasonicDistance': data.get('ultrasonicDistance', 0)
+                }
+                forecasts = forecaster.forecast_risk(model, current_data, trends)
+                
+                # Generate warnings
+                warnings = forecaster.generate_warning_message(prediction, forecasts, trends)
+                
+                response['prediction']['trends'] = trends
+                response['prediction']['forecasts'] = forecasts
+                if warnings:
+                    response['prediction']['warnings'] = warnings
+        
+        return jsonify(response)
         
     except Exception as e:
+        import traceback
+        print(f"❌ Error in /predict: {str(e)}")
+        print(traceback.format_exc())
         return jsonify({
             'success': False,
             'error': str(e)

@@ -5,28 +5,52 @@ const ML_API_URL = process.env.ML_API_URL || 'http://localhost:5001';
 
 export class MLService {
   /**
-   * Use trained ML model via Python API
+   * Use trained ML model via Python API with trend forecasting
    */
-  async getPredictionFromModel(sensorData) {
+  async getPredictionFromModel(sensorData, historyData = null) {
     try {
       console.log(`🤖 Calling ML API at: ${ML_API_URL}/predict`);
       console.log(`📊 Sending data:`, sensorData);
       
-      const response = await axios.post(`${ML_API_URL}/predict`, {
+      const payload = {
         soilMoisture: sensorData.soilMoisture,
         waterLevel: sensorData.waterLevel || 0,
         tilt: sensorData.tilt || 0,
         vibration: sensorData.vibration || 0,
         ultrasonicDistance: sensorData.ultrasonicDistance || 0
-      }, {
-        timeout: 10000, // Increased to 10 seconds for Render cold starts
+      };
+      
+      // Add history for trend analysis if available
+      if (historyData && historyData.length > 0) {
+        payload.history = historyData.map(item => ({
+          soilMoisture: item.soilMoisture,
+          waterLevel: item.waterLevel || 0,
+          tilt: item.tilt || 0,
+          vibration: item.vibration || 0,
+          ultrasonicDistance: item.ultrasonicDistance || 0,
+          timestamp: item.timestamp
+        }));
+        console.log(`📈 Including ${payload.history.length} historical readings for trend analysis`);
+      }
+      
+      const response = await axios.post(`${ML_API_URL}/predict`, payload, {
+        timeout: 15000, // Increased to 15 seconds for trend analysis
         headers: {
           'Content-Type': 'application/json'
         }
       });
       
       if (response.data.success) {
-        console.log(`✅ ML API responded: ${response.data.prediction.riskLevel} (${response.data.prediction.confidence}% confidence)`);
+        const pred = response.data.prediction;
+        console.log(`✅ ML API responded: ${pred.riskLevel} (${pred.confidence}% confidence)`);
+        
+        if (pred.forecasts && pred.forecasts.length > 0) {
+          console.log(`🔮 Generated ${pred.forecasts.length} forecasts`);
+        }
+        if (pred.warnings && pred.warnings.length > 0) {
+          console.log(`⚠️  Warnings: ${pred.warnings.length} alerts`);
+        }
+        
         return response.data.prediction;
       }
       
@@ -155,20 +179,37 @@ export class MLService {
   }
 
   /**
-   * Generate and save ML prediction
+   * Generate and save ML prediction with trend forecasting
    */
   async generatePrediction(sensorData, previousData = null) {
-    // Try to get prediction from trained ML model
-    const mlPrediction = await this.getPredictionFromModel(sensorData);
+    // Get recent history for trend analysis (last 20 readings)
+    const SensorData = (await import('../models/SensorData.js')).default;
+    const historyData = await SensorData.find()
+      .sort({ timestamp: -1 })
+      .limit(20)
+      .lean();
+    
+    // Try to get prediction from trained ML model with history
+    const mlPrediction = await this.getPredictionFromModel(sensorData, historyData);
     
     const riskScore = mlPrediction.riskScore;
     const riskLevel = mlPrediction.riskLevel;
     const features = this.extractFeatures(sensorData, previousData);
 
     // Check if prediction came from ML API or fallback
-    // ML API includes featureImportance, fallback doesn't
     const isMLModel = mlPrediction.featureImportance !== undefined;
     const modelUsed = isMLModel ? 'RandomForest' : 'Fallback';
+    
+    // Add trend data and forecasts to features
+    if (mlPrediction.trends) {
+      features.trends = mlPrediction.trends;
+    }
+    if (mlPrediction.forecasts) {
+      features.forecasts = mlPrediction.forecasts;
+    }
+    if (mlPrediction.warnings) {
+      features.warnings = mlPrediction.warnings;
+    }
     
     console.log(`📈 Saving prediction: ${riskLevel} (score: ${riskScore}, confidence: ${mlPrediction.confidence}%, model: ${modelUsed})`);
 
