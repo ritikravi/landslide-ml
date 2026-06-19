@@ -74,6 +74,7 @@ const Dashboard = () => {
           <RiskIndicator
             riskLevel={prediction?.riskLevel}
             riskScore={prediction?.riskScore}
+            sensorData={sensorData}
           />
         </div>
         <div className="w-full transform transition-all duration-300 hover:scale-[1.02]">
