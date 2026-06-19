@@ -143,7 +143,7 @@ export default function MLStatusBox({ prediction }) {
                     'CRITICAL': 'from-red-500/20 to-red-500/5 border-red-500/50 text-red-400'
                   };
                   
-                  const timeLabels = ['30 min', '1 hour', '2 hours'];
+                  const timeLabels = ['30 min', '1 hour', '2 hours', '3 hours'];
                   const colorClass = riskColors[forecast.riskLevel] || 'from-gray-500/20 to-gray-500/5 border-gray-500/50 text-gray-400';
                   
                   return (

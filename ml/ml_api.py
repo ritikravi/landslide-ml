@@ -175,7 +175,7 @@ def predict():
                     'vibration': data.get('vibration', 0),
                     'ultrasonicDistance': data.get('ultrasonicDistance', 0)
                 }
-                forecasts = forecaster.forecast_risk(model, current_data, trends)
+                forecasts = forecaster.forecast_risk(model, current_data, trends, forecast_minutes=[30, 60, 120, 180])
                 
                 # Generate warnings
                 warnings = forecaster.generate_warning_message(prediction, forecasts, trends)
