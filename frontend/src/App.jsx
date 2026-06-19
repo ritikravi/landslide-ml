@@ -7,6 +7,10 @@ import Alerts from './pages/Alerts';
 import Predictions from './pages/Predictions';
 import News from './pages/News';
 import HazardZones from './pages/HazardZones';
+import MonsoonTracker from './pages/MonsoonTracker';
+import EmergencyContacts from './pages/EmergencyContacts';
+import LandslideGuide from './pages/LandslideGuide';
+import SensorNetwork from './pages/SensorNetwork';
 
 function App() {
   return (
@@ -20,6 +24,10 @@ function App() {
             <Route path="/alerts" element={<Alerts />} />
             <Route path="/news" element={<News />} />
             <Route path="/hazard-zones" element={<HazardZones />} />
+            <Route path="/monsoon" element={<MonsoonTracker />} />
+            <Route path="/emergency" element={<EmergencyContacts />} />
+            <Route path="/guide" element={<LandslideGuide />} />
+            <Route path="/network" element={<SensorNetwork />} />
           </Routes>
         </Layout>
       </Router>
