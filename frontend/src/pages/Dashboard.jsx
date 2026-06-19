@@ -4,7 +4,6 @@ import { sensorAPI, mlAPI } from '../services/api';
 import StatCard from '../components/StatCard';
 import RiskIndicator from '../components/RiskIndicator';
 import MLStatusBox from '../components/MLStatusBox';
-import TrendForecast from '../components/TrendForecast';
 import { Droplets, TrendingUp, Navigation, Activity, Waves, Ruler } from 'lucide-react';
 import SensorChart from '../components/SensorChart';
 
@@ -127,11 +126,6 @@ const Dashboard = () => {
           color="green"
         />
       </div>
-
-      {/* Trend Forecast */}
-      {prediction?.features?.trends && (
-        <TrendForecast prediction={prediction} />
-      )}
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
