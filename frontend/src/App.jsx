@@ -6,6 +6,7 @@ import Analytics from './pages/Analytics';
 import Alerts from './pages/Alerts';
 import Predictions from './pages/Predictions';
 import News from './pages/News';
+import HazardZones from './pages/HazardZones';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/alerts" element={<Alerts />} />
             <Route path="/news" element={<News />} />
+            <Route path="/hazard-zones" element={<HazardZones />} />
           </Routes>
         </Layout>
       </Router>
