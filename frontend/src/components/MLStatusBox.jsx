@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, XCircle, Clock, Zap, TrendingUp } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { CheckCircle, Clock, Zap, TrendingUp } from 'lucide-react';
 
 export default function MLStatusBox({ prediction }) {
   const navigate = useNavigate();
@@ -11,8 +10,6 @@ export default function MLStatusBox({ prediction }) {
     { id: 3, name: 'ML Analysis', status: 'waiting', icon: Clock },
     { id: 4, name: 'Risk Prediction', status: 'waiting', icon: Clock }
   ]);
-
-  const [forecastData, setForecastData] = useState([]);
 
   useEffect(() => {
     if (prediction) {
@@ -37,23 +34,6 @@ export default function MLStatusBox({ prediction }) {
           detail: `${prediction.riskLevel} (${prediction.riskScore}/100)`
         }
       ]);
-
-      // Process forecast data for pie chart
-      const forecasts = prediction.features?.forecasts || [];
-      if (forecasts.length > 0) {
-        const riskCount = forecasts.reduce((acc, forecast) => {
-          acc[forecast.riskLevel] = (acc[forecast.riskLevel] || 0) + 1;
-          return acc;
-        }, {});
-
-        const chartData = Object.entries(riskCount).map(([level, count]) => ({
-          name: level,
-          value: count,
-          percentage: Math.round((count / forecasts.length) * 100)
-        }));
-
-        setForecastData(chartData);
-      }
     }
   }, [prediction]);
 
@@ -75,19 +55,11 @@ export default function MLStatusBox({ prediction }) {
     }
   };
 
-  const getRiskColor = (riskLevel) => {
-    switch(riskLevel) {
-      case 'LOW': return '#22c55e';
-      case 'MEDIUM': return '#eab308';
-      case 'HIGH': return '#f97316';
-      case 'CRITICAL': return '#ef4444';
-      default: return '#6b7280';
-    }
-  };
-
   const handleChartClick = () => {
     navigate('/predictions');
   };
+
+  const forecastData = prediction?.features?.forecasts || [];
 
   return (
     <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-xl p-8 border-2 border-slate-700 h-full flex flex-col shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 backdrop-blur-sm">
@@ -132,67 +104,68 @@ export default function MLStatusBox({ prediction }) {
           })}
         </div>
 
-        {/* Forecast Pie Chart */}
-        <div className="flex flex-col items-center justify-center">
+        {/* Forecast Timeline */}
+        <div className="flex flex-col justify-center gap-3">
           {forecastData.length > 0 ? (
             <div 
               onClick={handleChartClick}
-              className="cursor-pointer hover:scale-105 transition-transform duration-300 w-full"
+              className="cursor-pointer hover:scale-[1.02] transition-transform duration-300 space-y-3"
             >
-              <div className="text-center mb-3">
+              <div className="text-center mb-2">
                 <h4 className="text-sm font-bold text-white flex items-center justify-center gap-2">
                   <TrendingUp className="w-4 h-4 text-purple-400" />
                   Future Risk Forecast
                 </h4>
                 <p className="text-xs text-gray-400 mt-1">Click to view details</p>
               </div>
-              <ResponsiveContainer width="100%" height={180}>
-                <PieChart>
-                  <Pie
-                    data={forecastData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={45}
-                    outerRadius={70}
-                    paddingAngle={5}
-                    dataKey="value"
-                    animationBegin={0}
-                    animationDuration={800}
+              
+              {/* Timeline Forecasts */}
+              {(prediction?.features?.forecasts || []).map((forecast, index) => {
+                const riskColors = {
+                  'LOW': 'from-green-500/20 to-green-500/5 border-green-500/50 text-green-400',
+                  'MEDIUM': 'from-yellow-500/20 to-yellow-500/5 border-yellow-500/50 text-yellow-400',
+                  'HIGH': 'from-orange-500/20 to-orange-500/5 border-orange-500/50 text-orange-400',
+                  'CRITICAL': 'from-red-500/20 to-red-500/5 border-red-500/50 text-red-400'
+                };
+                
+                const timeLabels = ['30 min', '1 hour', '2 hours'];
+                const colorClass = riskColors[forecast.riskLevel] || 'from-gray-500/20 to-gray-500/5 border-gray-500/50 text-gray-400';
+                
+                return (
+                  <div 
+                    key={index}
+                    className={`bg-gradient-to-br ${colorClass} border rounded-lg p-3 hover:shadow-lg transition-all duration-300`}
                   >
-                    {forecastData.map((entry, index) => (
-                      <Cell 
-                        key={`cell-${index}`} 
-                        fill={getRiskColor(entry.name)}
-                        className="hover:opacity-80 transition-opacity"
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-3 h-3" />
+                        <span className="text-xs font-bold text-white">{timeLabels[index]}</span>
+                      </div>
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${colorClass.split(' ')[0]} border`}>
+                        {forecast.riskLevel}
+                      </span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold text-white">{forecast.riskScore}</span>
+                      <span className="text-xs text-gray-400">/100</span>
+                    </div>
+                    <div className="mt-2 bg-gray-700/30 rounded-full h-1.5 overflow-hidden">
+                      <div
+                        className={`h-1.5 rounded-full transition-all duration-1000 ${
+                          forecast.riskLevel === 'CRITICAL' ? 'bg-red-500' :
+                          forecast.riskLevel === 'HIGH' ? 'bg-orange-500' :
+                          forecast.riskLevel === 'MEDIUM' ? 'bg-yellow-500' :
+                          'bg-green-500'
+                        }`}
+                        style={{ width: `${forecast.riskScore}%` }}
                       />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#1e293b',
-                      border: '1px solid #334155',
-                      borderRadius: '0.5rem',
-                      padding: '8px'
-                    }}
-                    formatter={(value, name, props) => [
-                      `${props.payload.percentage}% (${value} forecast${value > 1 ? 's' : ''})`,
-                      props.payload.name
-                    ]}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="flex flex-wrap justify-center gap-3 mt-2">
-                {forecastData.map((item) => (
-                  <div key={item.name} className="flex items-center gap-2 text-xs">
-                    <div 
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: getRiskColor(item.name) }}
-                    />
-                    <span className="text-gray-300 font-medium">{item.name}</span>
-                    <span className="text-gray-500">({item.percentage}%)</span>
+                    </div>
+                    <div className="flex justify-between mt-2 text-xs text-gray-400">
+                      <span>Confidence: {forecast.confidence}%</span>
+                    </div>
                   </div>
-                ))}
-              </div>
+                );
+              })}
             </div>
           ) : (
             <div className="text-center text-gray-400 py-8">
