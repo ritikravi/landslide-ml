@@ -96,7 +96,7 @@ def get_access_token():
 
     app = msal.PublicClientApplication(
         POWER_BI_CONFIG["client_id"],
-        authority=f"https://login.microsoftonline.com/{POWER_BI_CONFIG['tenant_id']}"
+        authority="https://login.microsoftonline.com/common"
     )
 
     # Try silent token first (cached)
@@ -114,11 +114,19 @@ def get_access_token():
         scopes=["https://analysis.windows.net/powerbi/api/.default"]
     )
 
+    if "error" in flow:
+        raise Exception(f"Device flow failed: {flow.get('error_description', flow.get('error'))}")
+
+    user_code = flow.get("user_code", "")
+    verification_uri = flow.get("verification_uri", "https://microsoft.com/devicelogin")
+
     print("\n" + "="*60)
     print("🔐 POWER BI AUTHENTICATION REQUIRED")
     print("="*60)
-    print(f"\n{flow['message']}")
-    print("\nOpen the URL above and enter the code to authenticate.")
+    print(f"\n1. Open this URL: {verification_uri}")
+    print(f"2. Enter this code: {user_code}")
+    print(f"3. Sign in with: sangam251060@iiitmanipurac.in")
+    print("\nWaiting for authentication...")
     print("="*60 + "\n")
 
     result = app.acquire_token_by_device_flow(flow)
@@ -126,7 +134,7 @@ def get_access_token():
         print("✅ Authenticated successfully!")
         return result["access_token"]
 
-    raise Exception(f"Authentication failed: {result.get('error_description')}")
+    raise Exception(f"Authentication failed: {result.get('error_description', result.get('error'))}")
 
 
 def get_headers(token):

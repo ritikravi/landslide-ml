@@ -166,8 +166,34 @@ void readMPU6050(float &pitch, float &roll) {
   float ay = AcY / 16384.0;
   float az = AcZ / 16384.0;
   
-  pitch = atan2(ay, az) * 180.0 / PI;
-  roll = atan2(-ax, sqrt(ay * ay + az * az)) * 180.0 / PI;
+  // Raw angles
+  float rawPitch = atan2(ay, az) * 180.0 / PI;
+  float rawRoll  = atan2(-ax, sqrt(ay * ay + az * az)) * 180.0 / PI;
+  
+  // Raw angles are the actual sensor output
+  // Use raw values directly — they show real physical tilt
+  // At rest: Pitch=-135, Roll=35.26 (sensor mounting position)
+  // We track CHANGE from rest position for landslide detection
+  
+  // Store calibration baseline (first reading)
+  static float pitchBase = 0, rollBase = 0;
+  static bool calibrated = false;
+  
+  if (!calibrated) {
+    pitchBase = rawPitch;
+    rollBase  = rawRoll;
+    calibrated = true;
+  }
+  
+  // Relative change from baseline — this is what matters for landslide
+  pitch = rawPitch - pitchBase;
+  roll  = rawRoll  - rollBase;
+  
+  // Wrap to [-180, 180]
+  if (pitch >  180) pitch -= 360;
+  if (pitch < -180) pitch += 360;
+  if (roll  >  180) roll  -= 360;
+  if (roll  < -180) roll  += 360;
 }
 
 void loop() {
@@ -179,18 +205,39 @@ void loop() {
   // Read ultrasonic distance sensor
   float distance = readUltrasonicDistance();
   
-  // Read soil moisture sensor
-  int soilRaw = analogRead(SOIL_PIN);
+  // Read soil moisture sensor with averaging to reduce noise
+  long soilSum = 0;
+  for (int i = 0; i < 10; i++) {
+    soilSum += analogRead(SOIL_PIN);
+    delay(5);
+  }
+  int soilRaw = soilSum / 10;
   float soilMoisture = map(soilRaw, 2800, 1200, 0, 100);
   if (soilMoisture < 0) soilMoisture = 0;
   if (soilMoisture > 100) soilMoisture = 100;
   
   // Read water level sensor
-  int waterRaw = analogRead(WATER_PIN);
-  // INVERTED: High reading (dry) = 0%, Low reading (wet) = 100%
-  float waterLevel = map(waterRaw, 4095, 0, 0, 100);  // Inverted mapping
-  if (waterLevel < 0) waterLevel = 0;
-  if (waterLevel > 100) waterLevel = 100;
+  // GPIO35 is input-only with no internal pull-down
+  // When disconnected it floats near 4095 (max ADC = 0% water)
+  // Take 5 readings and average
+  long waterSum = 0;
+  for (int i = 0; i < 5; i++) {
+    waterSum += analogRead(WATER_PIN);
+    delay(10);
+  }
+  int waterAvg = waterSum / 5;
+
+  float waterLevel = 0;
+  // If raw value > 3800 (near max), sensor is likely disconnected or bone dry
+  // Report as 0 when disconnected
+  if (waterAvg > 3800) {
+    waterLevel = 0;
+  } else {
+    // Normal range: 3800 (dry/air) to ~500 (fully submerged)
+    waterLevel = map(waterAvg, 3800, 500, 0, 100);
+    if (waterLevel < 0)   waterLevel = 0;
+    if (waterLevel > 100) waterLevel = 100;
+  }
   
   // Read vibration sensor
   int vibrationState = digitalRead(VIBRATION_PIN);
