@@ -123,7 +123,9 @@ int readAvg(int pin, int samples = 10) {
 // ─────────────────────────────────────────────────────────
 float readSoilMoisture() {
   int raw = readAvg(SOIL_PIN);
-  // Dry=2800(0%) Wet=1200(100%) — adjust if needed
+  // If sensor disconnected, raw will be near 4095 (floating high)
+  if (raw > 3900) return 0;
+  // Dry ~2800 = 0%, Wet ~1200 = 100%
   float pct = (float)(2800 - raw) / (2800 - 1200) * 100.0;
   return constrain(pct, 0, 100);
 }
@@ -131,8 +133,9 @@ float readSoilMoisture() {
 // ─────────────────────────────────────────────────────────
 float readWaterLevel() {
   int raw = readAvg(WATER_PIN);
-  // GPIO35 floats ~4095 when disconnected (no internal pull-down)
-  if (raw > 3800) return 0;
+  // GPIO35 floats near 4095 when nothing connected
+  if (raw > 3900) return 0;
+  // Dry ~3800 = 0%, Submerged ~500 = 100%
   float pct = (float)(3800 - raw) / (3800 - 500) * 100.0;
   return constrain(pct, 0, 100);
 }
@@ -253,7 +256,7 @@ void sendToCloud(float soil, float water, float tilt, int vib,
   HTTPClient http;
   http.begin(serverUrl);
   http.addHeader("Content-Type", "application/json");
-  http.setTimeout(20000);
+  http.setTimeout(35000);  // 35 seconds for Render cold start
 
   StaticJsonDocument<300> doc;
   doc["soilMoisture"] = soil;
