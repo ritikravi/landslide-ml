@@ -91,18 +91,22 @@ void setup() {
 // ─────────────────────────────────────────────────────────
 void connectWiFi() {
   Serial.print("🌐 Connecting to WiFi");
+  WiFi.disconnect(true);
+  delay(200);
+  WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   int tries = 0;
-  while (WiFi.status() != WL_CONNECTED && tries < 20) {
+  while (WiFi.status() != WL_CONNECTED && tries < 30) {
     delay(500);
     Serial.print(".");
     tries++;
+    yield();
   }
   if (WiFi.status() == WL_CONNECTED) {
     Serial.println(" ✅");
     Serial.print("   IP: "); Serial.println(WiFi.localIP());
   } else {
-    Serial.println(" ❌ WiFi failed");
+    Serial.println(" ❌ WiFi failed — will retry next cycle");
   }
 }
 
@@ -119,8 +123,8 @@ int readAvg(int pin, int samples = 10) {
 // ─────────────────────────────────────────────────────────
 float readSoilMoisture() {
   int raw = readAvg(SOIL_PIN);
-  // 2800 = dry (0%), 1200 = wet (100%)
-  float pct = map(raw, 2800, 1200, 0, 100);
+  // Dry=2800(0%) Wet=1200(100%) — adjust if needed
+  float pct = (float)(2800 - raw) / (2800 - 1200) * 100.0;
   return constrain(pct, 0, 100);
 }
 
@@ -128,9 +132,8 @@ float readSoilMoisture() {
 float readWaterLevel() {
   int raw = readAvg(WATER_PIN);
   // GPIO35 floats ~4095 when disconnected (no internal pull-down)
-  // Sensor range: ~3800 dry → ~500 fully submerged
   if (raw > 3800) return 0;
-  float pct = map(raw, 3800, 500, 0, 100);
+  float pct = (float)(3800 - raw) / (3800 - 500) * 100.0;
   return constrain(pct, 0, 100);
 }
 
