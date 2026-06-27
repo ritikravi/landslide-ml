@@ -7,6 +7,7 @@ import MLStatusBox from '../components/MLStatusBox';
 import GPSMap from '../components/GPSMap';
 import NewsTicker from '../components/NewsTicker';
 import AnomalyDetector from '../components/AnomalyDetector';
+import WeatherWidget from '../components/WeatherWidget';
 import { Droplets, TrendingUp, Navigation, Activity, Waves, Ruler } from 'lucide-react';
 import SensorChart from '../components/SensorChart';
 
@@ -100,6 +101,9 @@ const Dashboard = () => {
 
       {/* Anomaly Detection */}
       <AnomalyDetector prediction={prediction} />
+
+      {/* Weather Widget */}
+      <WeatherWidget />
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

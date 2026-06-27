@@ -27,4 +27,9 @@ export const mlAPI = {
   getLatest: () => api.get('/ml/predictions/latest')
 };
 
+export const weatherAPI = {
+  getCurrent: () => api.get('/weather/current'),
+  getRiskBoost: () => api.get('/weather/risk-boost')
+};
+
 export default api;
