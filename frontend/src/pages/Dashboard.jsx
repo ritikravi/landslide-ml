@@ -8,6 +8,7 @@ import GPSMap from '../components/GPSMap';
 import NewsTicker from '../components/NewsTicker';
 import AnomalyDetector from '../components/AnomalyDetector';
 import WeatherWidget from '../components/WeatherWidget';
+import AlertNotifier from '../components/AlertNotifier';
 import { Droplets, TrendingUp, Navigation, Activity, Waves, Ruler } from 'lucide-react';
 import SensorChart from '../components/SensorChart';
 import DailyStats from '../components/DailyStats';
@@ -75,6 +76,11 @@ const Dashboard = () => {
     <div className="space-y-6 max-w-full animate-fade-in">
       {/* Live News Ticker */}
       <NewsTicker />
+
+      {/* Alert Sound Notifier */}
+      <div className="flex justify-end">
+        <AlertNotifier riskLevel={prediction?.riskLevel} />
+      </div>
 
       {/* Risk Indicator and ML Status */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">

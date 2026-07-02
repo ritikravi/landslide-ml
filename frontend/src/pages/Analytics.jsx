@@ -3,6 +3,7 @@ import { sensorAPI, mlAPI } from '../services/api';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Download } from 'lucide-react';
 import RiskTimeline from '../components/RiskTimeline';
+import RiskHeatmap from '../components/RiskHeatmap';
 
 const Analytics = () => {
   const [history, setHistory] = useState([]);
@@ -86,6 +87,9 @@ const Analytics = () => {
 
       {/* Risk Score Timeline */}
       <RiskTimeline data={predictions} />
+
+      {/* Hourly Risk Heatmap */}
+      <RiskHeatmap data={predictions} />
 
       {/* Multi-sensor bar chart */}
       <div className="bg-dark-card border border-dark-border rounded-lg p-6">
