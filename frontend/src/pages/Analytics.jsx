@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
-import { sensorAPI } from '../services/api';
+import { sensorAPI, mlAPI } from '../services/api';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { Download } from 'lucide-react';
+import RiskTimeline from '../components/RiskTimeline';
 
 const Analytics = () => {
   const [history, setHistory] = useState([]);
+  const [predictions, setPredictions] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const [timeRange, setTimeRange] = useState('24h');
 
@@ -14,9 +17,13 @@ const Analytics = () => {
   const fetchHistory = async () => {
     try {
       const limit = timeRange === '24h' ? 100 : timeRange === '7d' ? 500 : 1000;
-      const res = await sensorAPI.getHistory({ limit });
-      setHistory(res.data.data);
-      setTotalCount(res.data.total || res.data.count);
+      const [sensorRes, mlRes] = await Promise.all([
+        sensorAPI.getHistory({ limit }),
+        mlAPI.getHistory({ limit }),
+      ]);
+      setHistory(sensorRes.data.data);
+      setTotalCount(sensorRes.data.total || sensorRes.data.count);
+      setPredictions(mlRes.data.data || []);
     } catch (error) {
       console.error('Error fetching history:', error);
     }
@@ -29,21 +36,58 @@ const Analytics = () => {
     tilt: item.tilt * 10
   })).reverse();
 
+  // CSV export
+  const exportCSV = () => {
+    if (!history.length) return;
+    const headers = ['Timestamp', 'Soil Moisture (%)', 'Water Level (cm)', 'Tilt (°)', 'Vibration', 'Distance (cm)'];
+    const rows = history.map(d => [
+      new Date(d.timestamp).toISOString(),
+      d.soilMoisture ?? '',
+      d.waterLevel ?? '',
+      d.tilt ?? '',
+      d.vibration ?? '',
+      d.ultrasonicDistance ?? '',
+    ]);
+    const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `landslide_sensor_data_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <h2 className="text-2xl font-bold">Sensor Analytics</h2>
-        <select
-          value={timeRange}
-          onChange={(e) => setTimeRange(e.target.value)}
-          className="bg-dark-card border border-dark-border rounded-lg px-4 py-2 text-white"
-        >
-          <option value="24h">Last 24 Hours</option>
-          <option value="7d">Last 7 Days</option>
-          <option value="30d">Last 30 Days</option>
-        </select>
+        <div className="flex items-center gap-3">
+          <select
+            value={timeRange}
+            onChange={(e) => setTimeRange(e.target.value)}
+            className="bg-dark-card border border-dark-border rounded-lg px-4 py-2 text-white"
+          >
+            <option value="24h">Last 24 Hours</option>
+            <option value="7d">Last 7 Days</option>
+            <option value="30d">Last 30 Days</option>
+          </select>
+          <button
+            onClick={exportCSV}
+            disabled={!history.length}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600/30 border border-blue-500/50 text-blue-300 rounded-lg hover:bg-blue-600/50 transition-all text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Download className="w-4 h-4" />
+            Export CSV
+          </button>
+        </div>
       </div>
 
+      {/* Risk Score Timeline */}
+      <RiskTimeline data={predictions} />
+
+      {/* Multi-sensor bar chart */}
       <div className="bg-dark-card border border-dark-border rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">Multi-Sensor Comparison</h3>
         <ResponsiveContainer width="100%" height={400}>
@@ -66,6 +110,7 @@ const Analytics = () => {
         </ResponsiveContainer>
       </div>
 
+      {/* Summary cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 border-2 border-blue-500/50 rounded-xl p-6 hover:scale-105 transition-transform">
           <h4 className="text-blue-400 font-bold text-lg mb-2">Total Readings</h4>

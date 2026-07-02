@@ -10,6 +10,7 @@ import AnomalyDetector from '../components/AnomalyDetector';
 import WeatherWidget from '../components/WeatherWidget';
 import { Droplets, TrendingUp, Navigation, Activity, Waves, Ruler } from 'lucide-react';
 import SensorChart from '../components/SensorChart';
+import DailyStats from '../components/DailyStats';
 
 const Dashboard = () => {
   const { latestData } = useSocket();
@@ -98,6 +99,9 @@ const Dashboard = () => {
         <StatCard title="Distance" value={sensorData?.ultrasonicDistance?.toFixed(1)} unit="cm" icon={Ruler} color="purple" />
         <StatCard title="GPS Status" value={sensorData?.latitude ? 'Active' : 'N/A'} unit="" icon={Navigation} color="green" />
       </div>
+
+      {/* Daily Risk Summary */}
+      <DailyStats history={history} />
 
       {/* Anomaly Detection */}
       <AnomalyDetector prediction={prediction} />

@@ -24,7 +24,8 @@ export const alertAPI = {
 
 export const mlAPI = {
   getPredictions: (params) => api.get('/ml/predictions', { params }),
-  getLatest: () => api.get('/ml/predictions/latest')
+  getLatest: () => api.get('/ml/predictions/latest'),
+  getHistory: (params) => api.get('/ml/predictions', { params })
 };
 
 export const weatherAPI = {
