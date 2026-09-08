@@ -1,0 +1,173 @@
+.vegetation-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #4CAF50;
+}
+
+.veg-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.veg-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.resolution-badge {
+  background: #E8F5E9;
+  color: #2E7D32;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.ndvi-display {
+  margin: 20px 0;
+}
+
+.ndvi-value {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+
+.ndvi-label {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.ndvi-number {
+  font-size: 36px;
+  font-weight: bold;
+}
+
+.ndvi-bar {
+  height: 24px;
+  background: #F5F5F5;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.ndvi-fill {
+  height: 100%;
+  transition: width 0.5s ease;
+  border-radius: 12px;
+}
+
+.ndvi-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #999;
+}
+
+.health-status {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #F5F5F5;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.status-icon {
+  font-size: 32px;
+}
+
+.status-label {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.status-value {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.veg-details {
+  background: #F5F5F5;
+  border-radius: 8px;
+  padding: 15px;
+  margin: 15px 0;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #E0E0E0;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  color: #666;
+  font-size: 14px;
+}
+
+.detail-value {
+  color: #333;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.ndvi-info {
+  margin-top: 15px;
+  padding: 12px;
+  background: #E3F2FD;
+  border-radius: 8px;
+}
+
+.info-text {
+  margin: 0;
+  font-size: 13px;
+  color: #1976D2;
+  line-height: 1.5;
+}
+
+.loading,
+.error-message {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+.retry-btn {
+  display: block;
+  margin: 10px auto 0;
+  padding: 8px 20px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.retry-btn:hover {
+  background: #388E3C;
+}
+
+.vegetation-card.error {
+  border-left-color: #f44336;
+}

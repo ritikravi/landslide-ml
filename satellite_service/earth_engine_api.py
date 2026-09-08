@@ -17,12 +17,25 @@ CORS(app)
 # Initialize Earth Engine
 # Note: First time setup requires authentication
 # Run: earthengine authenticate
-try:
-    ee.Initialize()
-    print("✅ Earth Engine initialized successfully")
-except Exception as e:
-    print(f"⚠️  Earth Engine not initialized: {e}")
-    print("   Run 'earthengine authenticate' after approval")
+EE_PROJECT_IDS = [
+    'spaceclub-501318',
+    'rmna-street-495308', 
+    'verdant-abacus-480107-i9'
+]
+
+ee_initialized = False
+for project_id in EE_PROJECT_IDS:
+    try:
+        ee.Initialize(project=project_id)
+        print(f"✅ Earth Engine initialized successfully with project: {project_id}")
+        ee_initialized = True
+        break
+    except Exception as e:
+        continue
+
+if not ee_initialized:
+    print(f"⚠️  Earth Engine not initialized. Tried projects: {EE_PROJECT_IDS}")
+    print("   Make sure you've registered a project at: https://console.cloud.google.com/earth-engine")
 
 # Default location (Chandigarh region)
 DEFAULT_LAT = 30.97

@@ -10,6 +10,8 @@ import AnomalyDetector from '../components/AnomalyDetector';
 import WeatherWidget from '../components/WeatherWidget';
 import AlertNotifier from '../components/AlertNotifier';
 import SatelliteRainfall from '../components/SatelliteRainfall';
+import GPMRainfall from '../components/GPMRainfall';
+import VegetationHealth from '../components/VegetationHealth';
 import { Droplets, TrendingUp, Navigation, Activity, Waves, Ruler } from 'lucide-react';
 import SensorChart from '../components/SensorChart';
 import DailyStats from '../components/DailyStats';
@@ -117,20 +119,28 @@ const Dashboard = () => {
       <WeatherWidget />
 
       {/* Satellite Rainfall Data */}
-      <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-white flex items-center">
-            <span className="text-2xl mr-2">🛰️</span>
-            Satellite Rainfall Data
-          </h2>
-          <a 
-            href="/satellite" 
-            className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
-          >
-            View Details →
-          </a>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
+          <GPMRainfall />
         </div>
-        <SatelliteRainfall />
+        <div className="lg:col-span-1">
+          <VegetationHealth />
+        </div>
+        <div className="lg:col-span-1 bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-white flex items-center">
+              <span className="text-2xl mr-2">🛰️</span>
+              NASA POWER (Trends)
+            </h2>
+            <a 
+              href="/satellite" 
+              className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              View Details →
+            </a>
+          </div>
+          <SatelliteRainfall />
+        </div>
       </div>
 
       {/* Charts */}
