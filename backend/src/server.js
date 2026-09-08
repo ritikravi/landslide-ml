@@ -10,12 +10,14 @@ import dotenv from 'dotenv';
 import { connectDatabase } from './config/database.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { setupSocketHandlers } from './socket/socketHandler.js';
+import satelliteService from './services/satelliteService.js';
 import sensorRoutes from './routes/sensorRoutes.js';
 import alertRoutes from './routes/alertRoutes.js';
 import mlRoutes from './routes/mlRoutes.js';
 import powerbiRoutes from './routes/powerbiRoutes.js';
 import newsRoutes from './routes/newsRoutes.js';
 import weatherRoutes from './routes/weatherRoutes.js';
+import satelliteRoutes from './routes/satelliteRoutes.js';
 
 dotenv.config();
 
@@ -62,6 +64,7 @@ app.use('/api', mlRoutes);
 app.use('/api/powerbi', powerbiRoutes);
 app.use('/api', newsRoutes);
 app.use('/api', weatherRoutes);
+app.use('/api', satelliteRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -84,6 +87,13 @@ const startServer = async () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📡 Socket.IO ready for connections`);
   });
+  
+  // Auto-update satellite data daily
+  // Run immediately on startup, then every 24 hours
+  satelliteService.autoUpdate();
+  setInterval(() => {
+    satelliteService.autoUpdate();
+  }, 24 * 60 * 60 * 1000); // 24 hours
 };
 
 startServer();

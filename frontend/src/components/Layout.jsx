@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Activity, BarChart3, Bell, Brain, Newspaper, MapPin, CloudRain, Phone, BookOpen, Cpu } from 'lucide-react';
+import { Activity, BarChart3, Bell, Brain, Newspaper, MapPin, CloudRain, Phone, BookOpen, Cpu, Satellite } from 'lucide-react';
 import ConnectionStatus from './ConnectionStatus';
 
 const Layout = ({ children }) => {
@@ -8,6 +8,7 @@ const Layout = ({ children }) => {
   const navItems = [
     { path: '/', label: 'Dashboard', icon: Activity },
     { path: '/predictions', label: 'Predictions', icon: Brain },
+    { path: '/satellite', label: 'Satellite', icon: Satellite },
     { path: '/network', label: 'Sensors', icon: Cpu },
     { path: '/analytics', label: 'Analytics', icon: BarChart3 },
     { path: '/alerts', label: 'Alerts', icon: Bell },

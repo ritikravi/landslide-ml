@@ -11,6 +11,7 @@ import MonsoonTracker from './pages/MonsoonTracker';
 import EmergencyContacts from './pages/EmergencyContacts';
 import LandslideGuide from './pages/LandslideGuide';
 import SensorNetwork from './pages/SensorNetwork';
+import SatelliteData from './pages/SatelliteData';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
             <Route path="/emergency" element={<EmergencyContacts />} />
             <Route path="/guide" element={<LandslideGuide />} />
             <Route path="/network" element={<SensorNetwork />} />
+            <Route path="/satellite" element={<SatelliteData />} />
           </Routes>
         </Layout>
       </Router>
