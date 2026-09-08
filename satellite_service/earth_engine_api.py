@@ -37,20 +37,15 @@ def initialize_earth_engine():
             return True
         except Exception as e:
             print(f"❌ Service account init failed: {e}")
-            return False
-    else:
-        # Local development: Try multiple projects
-        projects = ['spaceclub-501318', 'rmna-street-495308', 'verdant-abacus-480107-i9']
-        
-        for project_id in projects:
-            try:
-                ee.Initialize(project=project_id)
-                print(f"✅ Earth Engine initialized with project: {project_id}")
-                return True
-            except:
-                continue
-        
-        print("⚠️  Earth Engine not initialized")
+            # Fall through to try regular auth
+    
+    # Try regular initialization with project
+    try:
+        ee.Initialize(project='spaceclub-501318')
+        print(f"✅ Earth Engine initialized with project: spaceclub-501318")
+        return True
+    except Exception as e:
+        print(f"⚠️  Earth Engine not initialized: {e}")
         return False
 
 # Initialize on startup
