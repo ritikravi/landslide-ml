@@ -14,28 +14,47 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-# Initialize Earth Engine
-# Note: First time setup requires authentication
-# Run: earthengine authenticate
-EE_PROJECT_IDS = [
-    'spaceclub-501318',
-    'rmna-street-495308', 
-    'verdant-abacus-480107-i9'
-]
+# Initialize Earth Engine with Service Account support
+def initialize_earth_engine():
+    """Initialize Earth Engine with service account or local auth"""
+    service_account_key = os.getenv('GEE_SERVICE_ACCOUNT_KEY')
+    
+    if service_account_key:
+        # Production: Use service account
+        try:
+            import json
+            credentials_dict = json.loads(service_account_key)
+            service_account_email = credentials_dict['client_email']
+            project_id = credentials_dict.get('project_id', 'spaceclub-501318')
+            
+            credentials = ee.ServiceAccountCredentials(
+                email=service_account_email,
+                key_data=service_account_key
+            )
+            
+            ee.Initialize(credentials=credentials, project=project_id)
+            print(f"✅ Earth Engine initialized with service account: {service_account_email}")
+            return True
+        except Exception as e:
+            print(f"❌ Service account init failed: {e}")
+            return False
+    else:
+        # Local development: Try multiple projects
+        projects = ['spaceclub-501318', 'rmna-street-495308', 'verdant-abacus-480107-i9']
+        
+        for project_id in projects:
+            try:
+                ee.Initialize(project=project_id)
+                print(f"✅ Earth Engine initialized with project: {project_id}")
+                return True
+            except:
+                continue
+        
+        print("⚠️  Earth Engine not initialized")
+        return False
 
-ee_initialized = False
-for project_id in EE_PROJECT_IDS:
-    try:
-        ee.Initialize(project=project_id)
-        print(f"✅ Earth Engine initialized successfully with project: {project_id}")
-        ee_initialized = True
-        break
-    except Exception as e:
-        continue
-
-if not ee_initialized:
-    print(f"⚠️  Earth Engine not initialized. Tried projects: {EE_PROJECT_IDS}")
-    print("   Make sure you've registered a project at: https://console.cloud.google.com/earth-engine")
+# Initialize on startup
+ee_initialized = initialize_earth_engine()
 
 # Default location (Chandigarh region)
 DEFAULT_LAT = 30.97

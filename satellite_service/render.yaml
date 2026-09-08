@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: landslide-earth-engine-api
+    runtime: python
+    plan: free
+    region: oregon
+    branch: main
+    rootDir: satellite_service
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn earth_engine_api:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: PORT
+        value: 5002
+      - key: GEE_SERVICE_ACCOUNT_KEY
+        sync: false
+    healthCheckPath: /health
