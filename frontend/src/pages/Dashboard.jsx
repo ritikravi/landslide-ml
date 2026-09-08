@@ -119,27 +119,39 @@ const Dashboard = () => {
       <WeatherWidget />
 
       {/* Satellite Rainfall Data */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
-          <GPMRainfall />
+      <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold text-white flex items-center">
+            <span className="text-2xl mr-2">🛰️</span>
+            Satellite Rainfall Data
+          </h2>
+          <a 
+            href="/satellite" 
+            className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+          >
+            View Details →
+          </a>
         </div>
-        <div className="lg:col-span-1">
-          <VegetationHealth />
-        </div>
-        <div className="lg:col-span-1 bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-white flex items-center">
-              <span className="text-2xl mr-2">🛰️</span>
-              NASA POWER (Trends)
-            </h2>
-            <a 
-              href="/satellite" 
-              className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
-            >
-              View Details →
-            </a>
+        <SatelliteRainfall />
+      </div>
+
+      {/* Earth Engine Data - Coming Soon */}
+      <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
+        <h2 className="text-xl font-bold text-white mb-4">
+          <span className="text-2xl mr-2">🛰️</span>
+          Advanced Satellite Analysis (Coming Soon)
+        </h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="bg-slate-700/50 p-4 rounded-lg">
+            <h3 className="text-white font-semibold mb-2">📡 GPM Rainfall (Near Real-Time)</h3>
+            <p className="text-gray-300 text-sm">4-6 hour delay, 10km resolution</p>
+            <p className="text-blue-400 text-sm mt-2">Deploying soon...</p>
           </div>
-          <SatelliteRainfall />
+          <div className="bg-slate-700/50 p-4 rounded-lg">
+            <h3 className="text-white font-semibold mb-2">🌱 Vegetation Health (NDVI)</h3>
+            <p className="text-gray-300 text-sm">Sentinel-2, 10m resolution</p>
+            <p className="text-blue-400 text-sm mt-2">Deploying soon...</p>
+          </div>
         </div>
       </div>
 
