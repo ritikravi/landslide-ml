@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
+import { Leaf, AlertCircle } from 'lucide-react';
 import axios from 'axios';
-import './VegetationHealth.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
@@ -8,7 +8,6 @@ function VegetationHealth() {
   const [vegData, setVegData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [ndviTrend, setNdviTrend] = useState([]);
 
   useEffect(() => {
     fetchVegetationData();
@@ -23,15 +22,6 @@ function VegetationHealth() {
       
       if (response.data.success) {
         setVegData(response.data.data);
-        
-        // Generate mock NDVI trend (last 30 days)
-        const currentNdvi = response.data.data.ndvi || 0.5;
-        const mockNdviTrend = Array.from({ length: 6 }, (_, i) => ({
-          week: i + 1,
-          ndvi: Math.max(0, Math.min(1, currentNdvi + (Math.random() - 0.5) * 0.2))
-        }));
-        setNdviTrend(mockNdviTrend);
-        
         setError(null);
       }
     } catch (err) {
@@ -44,19 +34,24 @@ function VegetationHealth() {
 
   if (loading && !vegData) {
     return (
-      <div className="vegetation-card">
-        <h3>🌱 Vegetation Health (Sentinel-2)</h3>
-        <p className="loading">Loading satellite data...</p>
+      <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
+        </div>
       </div>
     );
   }
 
   if (error && !vegData) {
     return (
-      <div className="vegetation-card error">
-        <h3>🌱 Vegetation Health (Sentinel-2)</h3>
-        <p className="error-message">{error}</p>
-        <button onClick={fetchVegetationData} className="retry-btn">Retry</button>
+      <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
+        <div className="flex items-center justify-center h-64 text-red-400">
+          <AlertCircle className="mr-2" />
+          {error}
+          <button onClick={fetchVegetationData} className="ml-4 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm transition-colors">
+            Retry
+          </button>
+        </div>
       </div>
     );
   }
@@ -65,145 +60,44 @@ function VegetationHealth() {
   const health = vegData?.vegetation_health || 'Unknown';
   const risk = vegData?.slope_stability_risk || 'Unknown';
 
-  const getHealthColor = () => {
-    if (health === 'Healthy') return '#4CAF50';
-    if (health === 'Moderate') return '#FF9800';
-    return '#f44336';
+  const getHealthInfo = () => {
+    if (health === 'Healthy') return { color: 'text-green-500', bg: 'bg-green-500/20', border: 'border-green-500/30' };
+    if (health === 'Moderate') return { color: 'text-yellow-500', bg: 'bg-yellow-500/20', border: 'border-yellow-500/30' };
+    return { color: 'text-red-500', bg: 'bg-red-500/20', border: 'border-red-500/30' };
   };
 
-  const getRiskColor = () => {
-    if (risk === 'Low') return '#4CAF50';
-    if (risk === 'Medium') return '#FF9800';
-    return '#f44336';
+  const getRiskInfo = () => {
+    if (risk === 'Low') return { color: 'text-green-500', bg: 'bg-green-500/20' };
+    if (risk === 'Medium') return { color: 'text-yellow-500', bg: 'bg-yellow-500/20' };
+    return { color: 'text-red-500', bg: 'bg-red-500/20' };
   };
 
-  const getHealthIcon = () => {
-    if (health === 'Healthy') return '✅';
-    if (health === 'Moderate') return '⚠️';
-    return '❌';
-  };
+  const healthInfo = getHealthInfo();
+  const riskInfo = getRiskInfo();
 
   return (
-    <div className="vegetation-card" style={{ borderLeft: `4px solid ${getHealthColor()}` }}>
-      <div className="veg-header">
-        <h3>🌱 Vegetation Health</h3>
-        <span className="resolution-badge">10m resolution</span>
+    <div className="bg-gradient-to-br from-green-500/10 to-green-600/10 border border-green-500/30 rounded-xl p-4">
+      <div className="flex items-center justify-between mb-2">
+        <Leaf className="text-green-400" size={24} />
+        <span className="text-xs text-slate-400">Sentinel-2 (10m)</span>
+      </div>
+      <div className="text-2xl font-bold text-white">NDVI: {ndvi?.toFixed(3) || 'N/A'}</div>
+      <div className="text-sm text-slate-400 mb-3">Vegetation Index</div>
+      
+      <div className="space-y-2">
+        <div className={`inline-block px-2 py-1 rounded text-xs font-semibold ${healthInfo.bg} ${healthInfo.color}`}>
+          Health: {health}
+        </div>
+        <div className={`inline-block ml-2 px-2 py-1 rounded text-xs font-semibold ${riskInfo.bg} ${riskInfo.color}`}>
+          Risk: {risk}
+        </div>
       </div>
       
-      <div className="ndvi-display">
-        <div className="ndvi-value">
-          <span className="ndvi-label">NDVI</span>
-          <span className="ndvi-number" style={{ color: getHealthColor() }}>
-            {ndvi?.toFixed(3) || 'N/A'}
-          </span>
+      {vegData?.image_date && (
+        <div className="mt-3 text-xs text-slate-500">
+          {new Date(vegData.image_date).toLocaleString()}
         </div>
-        <div className="ndvi-bar">
-          <div 
-            className="ndvi-fill" 
-            style={{ 
-              width: `${((ndvi + 1) / 2) * 100}%`,
-              background: getHealthColor()
-            }}
-          />
-        </div>
-        <div className="ndvi-scale">
-          <span>-1.0</span>
-          <span>0.0</span>
-          <span>+1.0</span>
-        </div>
-      </div>
-
-      {/* NDVI Trend Chart */}
-      <div className="trend-section">
-        <div className="trend-header">6-Week NDVI Trend</div>
-        <div className="ndvi-trend-chart">
-          <svg viewBox="0 0 200 60" className="trend-svg">
-            <defs>
-              <linearGradient id="ndviGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="rgba(255,255,255,0.3)" />
-                <stop offset="100%" stopColor="rgba(255,255,255,0.05)" />
-              </linearGradient>
-            </defs>
-            {/* Trend line */}
-            <polyline
-              points={ndviTrend.map((point, i) => 
-                `${(i / (ndviTrend.length - 1)) * 180 + 10},${60 - (point.ndvi * 50)}`
-              ).join(' ')}
-              fill="none"
-              stroke="rgba(255,255,255,0.9)"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-            {/* Area under line */}
-            <polygon
-              points={`10,60 ${ndviTrend.map((point, i) => 
-                `${(i / (ndviTrend.length - 1)) * 180 + 10},${60 - (point.ndvi * 50)}`
-              ).join(' ')} 190,60`}
-              fill="url(#ndviGradient)"
-            />
-            {/* Data points */}
-            {ndviTrend.map((point, i) => (
-              <circle
-                key={i}
-                cx={(i / (ndviTrend.length - 1)) * 180 + 10}
-                cy={60 - (point.ndvi * 50)}
-                r="3"
-                fill="white"
-                stroke={getHealthColor()}
-                strokeWidth="2"
-              />
-            ))}
-          </svg>
-        </div>
-        <div className="trend-labels">
-          <span>6w ago</span>
-          <span>Current</span>
-        </div>
-      </div>
-
-      <div className="health-status">
-        <div className="status-item">
-          <span className="status-icon">{getHealthIcon()}</span>
-          <div>
-            <div className="status-label">Vegetation Health</div>
-            <div className="status-value" style={{ color: getHealthColor() }}>
-              {health}
-            </div>
-          </div>
-        </div>
-
-        <div className="status-item">
-          <span className="status-icon">
-            {risk === 'Low' ? '🟢' : risk === 'Medium' ? '🟡' : '🔴'}
-          </span>
-          <div>
-            <div className="status-label">Slope Stability Risk</div>
-            <div className="status-value" style={{ color: getRiskColor() }}>
-              {risk}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="veg-details">
-        <div className="detail-row">
-          <span className="detail-label">Source:</span>
-          <span className="detail-value">Sentinel-2 SR</span>
-        </div>
-        <div className="detail-row">
-          <span className="detail-label">Image Date:</span>
-          <span className="detail-value">
-            {vegData?.image_date ? new Date(vegData.image_date).toLocaleDateString() : 'N/A'}
-          </span>
-        </div>
-      </div>
-
-      <div className="ndvi-info">
-        <p className="info-text">
-          <strong>NDVI (Normalized Difference Vegetation Index)</strong> monitors vegetation health.
-          Stressed vegetation indicates increased landslide risk.
-        </p>
-      </div>
+      )}
     </div>
   );
 }

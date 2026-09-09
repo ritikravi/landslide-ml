@@ -22,6 +22,7 @@ const Dashboard = () => {
   const [prediction, setPrediction] = useState(null);
   const [history, setHistory] = useState([]);
   const [esp32Active, setEsp32Active] = useState(false);
+  const [nasaPowerSummary, setNasaPowerSummary] = useState(null);
 
   useEffect(() => {
     fetchInitialData();
@@ -61,15 +62,21 @@ const Dashboard = () => {
 
   const fetchInitialData = async () => {
     try {
-      const [latestRes, predictionRes, historyRes] = await Promise.all([
+      const [latestRes, predictionRes, historyRes, nasaRes] = await Promise.all([
         sensorAPI.getLatest(),
         mlAPI.getLatest(),
-        sensorAPI.getHistory({ limit: 50 })
+        sensorAPI.getHistory({ limit: 50 }),
+        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/satellite/rainfall-summary`)
+          .then(res => res.json())
       ]);
 
       setSensorData(latestRes.data.data);
       setPrediction(predictionRes.data.data);
       setHistory(historyRes.data.data);
+      
+      if (nasaRes.success) {
+        setNasaPowerSummary(nasaRes.data);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -118,36 +125,35 @@ const Dashboard = () => {
       {/* Weather Widget */}
       <WeatherWidget />
 
-      {/* Satellite Data - All Sources */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 flex">
-          <div className="w-full">
-            <GPMRainfall />
-          </div>
-        </div>
-        <div className="lg:col-span-1 flex">
-          <div className="w-full">
-            <VegetationHealth />
-          </div>
-        </div>
-        <div className="lg:col-span-1 flex">
-          <div className="w-full bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-white flex items-center">
-                <span className="text-2xl mr-2">🛰️</span>
-                NASA POWER (Trends)
-              </h2>
-              <a 
-                href="/satellite" 
-                className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
-              >
-                View Details →
-              </a>
+      {/* Satellite Data - Compact Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <GPMRainfall />
+        <VegetationHealth />
+        {nasaPowerSummary && (
+          <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 border border-blue-500/30 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-2">
+              <Droplets className="text-blue-400" size={24} />
+              <span className="text-xs text-slate-400">NASA POWER</span>
             </div>
-            <SatelliteRainfall />
+            <div className="text-2xl font-bold text-white">{nasaPowerSummary.rainfall30day?.toFixed(1) || '0.0'} mm</div>
+            <div className="text-sm text-slate-400 mb-3">30-Day Rainfall</div>
+            
+            <div className="space-y-1 text-xs text-slate-400">
+              <div>7-Day: {nasaPowerSummary.rainfall7day?.toFixed(1) || '0.0'} mm</div>
+              <div>24h: {nasaPowerSummary.rainfall24h?.toFixed(1) || '0.0'} mm</div>
+            </div>
+            
+            {nasaPowerSummary.lastUpdate && (
+              <div className="mt-3 text-xs text-slate-500">
+                {new Date(nasaPowerSummary.lastUpdate).toLocaleString()}
+              </div>
+            )}
           </div>
-        </div>
+        )}
       </div>
+
+      {/* Full Satellite Data Widget */}
+      <SatelliteRainfall />
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
