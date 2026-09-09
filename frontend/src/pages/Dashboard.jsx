@@ -120,26 +120,32 @@ const Dashboard = () => {
 
       {/* Satellite Data - All Sources */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
-          <GPMRainfall />
-        </div>
-        <div className="lg:col-span-1">
-          <VegetationHealth />
-        </div>
-        <div className="lg:col-span-1 bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-white flex items-center">
-              <span className="text-2xl mr-2">🛰️</span>
-              NASA POWER (Trends)
-            </h2>
-            <a 
-              href="/satellite" 
-              className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
-            >
-              View Details →
-            </a>
+        <div className="lg:col-span-1 flex">
+          <div className="w-full">
+            <GPMRainfall />
           </div>
-          <SatelliteRainfall />
+        </div>
+        <div className="lg:col-span-1 flex">
+          <div className="w-full">
+            <VegetationHealth />
+          </div>
+        </div>
+        <div className="lg:col-span-1 flex">
+          <div className="w-full bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-white flex items-center">
+                <span className="text-2xl mr-2">🛰️</span>
+                NASA POWER (Trends)
+              </h2>
+              <a 
+                href="/satellite" 
+                className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+              >
+                View Details →
+              </a>
+            </div>
+            <SatelliteRainfall />
+          </div>
         </div>
       </div>
 
