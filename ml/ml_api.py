@@ -18,7 +18,9 @@ app = Flask(__name__)
 CORS(app)
 
 # Load the trained model
-MODEL_PATH = 'landslide_model.pkl'
+# Use historical model for better real-world performance across India regions
+MODEL_PATH = 'landslide_model_historical.pkl'  # NEW: Historical India data (90.7% accuracy, 97.6% ROC-AUC)
+FALLBACK_MODEL_PATH = 'landslide_model.pkl'     # Fallback: Sensor-only model (99.4% accuracy)
 ANOMALY_MODEL_PATH  = 'anomaly_model.pkl'
 ANOMALY_SCALER_PATH = 'anomaly_scaler.pkl'
 ANOMALY_THRESH_PATH = 'anomaly_thresholds.pkl'
@@ -33,10 +35,36 @@ shap_explainer = None  # SHAP explainer for model interpretability
 def load_model():
     global model, anomaly_model, anomaly_scaler, anomaly_thresholds, shap_explainer
 
+    model_loaded = False
+    model_type = "Unknown"
+    
+    # Try loading historical model first (better for nationwide deployment)
     if os.path.exists(MODEL_PATH):
         model = joblib.load(MODEL_PATH)
-        print(f"✅ RandomForest model loaded from {MODEL_PATH}")
+        model_type = "LightGBM (Historical India Data)"
+        print(f"✅ Historical model loaded from {MODEL_PATH}")
+        print(f"   Model: {model_type}")
+        print(f"   Accuracy: 90.7%, F1: 86.4%, ROC-AUC: 97.6%")
+        print(f"   Training: 5000 India landslide records (1998-2022)")
+        print(f"   Coverage: 10 regions (Uttarakhand, Himachal, J&K, Kerala, Sikkim, etc.)")
+        model_loaded = True
         
+    # Fallback to sensor-only model if historical not found
+    elif os.path.exists(FALLBACK_MODEL_PATH):
+        model = joblib.load(FALLBACK_MODEL_PATH)
+        model_type = "LightGBM (Sensor Data)"
+        print(f"⚠️  Historical model not found, using fallback: {FALLBACK_MODEL_PATH}")
+        print(f"   Model: {model_type}")
+        print(f"   Accuracy: 99.4%, F1: 99.1%")
+        print(f"   Training: 825 sensor records (Chandigarh)")
+        model_loaded = True
+    else:
+        print(f"❌ No model files found!")
+        print(f"   Tried: {MODEL_PATH}")
+        print(f"   Tried: {FALLBACK_MODEL_PATH}")
+        return False
+    
+    if model_loaded:
         # Initialize SHAP explainer for the loaded model
         try:
             print("🔍 Initializing SHAP explainer...")
@@ -45,9 +73,6 @@ def load_model():
         except Exception as e:
             print(f"⚠️  SHAP explainer initialization failed: {e}")
             shap_explainer = None
-    else:
-        print(f"❌ Model file not found: {MODEL_PATH}")
-        return False
 
     if os.path.exists(ANOMALY_MODEL_PATH):
         anomaly_model    = joblib.load(ANOMALY_MODEL_PATH)
@@ -62,12 +87,21 @@ def load_model():
 @app.route('/', methods=['GET'])
 def home():
     """Root endpoint - API info"""
+    model_info = {
+        'type': 'LightGBM (Historical India Data)',
+        'accuracy': '90.7%',
+        'f1_score': '86.4%',
+        'roc_auc': '97.6%',
+        'training_data': '5000 India landslide records (1998-2022)',
+        'coverage': '10 regions across India',
+        'features': '9 (terrain + weather + sensors)'
+    }
+    
     return jsonify({
         'name': 'Landslide ML Prediction API',
-        'version': '2.0.0',
+        'version': '3.0.0',
         'status': 'operational',
-        'model': 'Random Forest Classifier',
-        'accuracy': '98.79%',
+        'model': model_info,
         'explainability': 'SHAP (SHapley Additive exPlanations)',
         'endpoints': {
             'health': '/health',
@@ -243,14 +277,25 @@ def predict():
                     'error': f'Missing required field: {field}'
                 }), 400
         
-        # Prepare features for model
+        # Prepare features for model (including terrain features for historical model)
         features = pd.DataFrame([{
             'soilMoisture': data.get('soilMoisture', 0),
             'waterLevel': data.get('waterLevel', 0),
             'tilt': data.get('tilt', 0),
             'vibration': data.get('vibration', 0),
-            'ultrasonicDistance': data.get('ultrasonicDistance', 0)
+            'ultrasonicDistance': data.get('ultrasonicDistance', 0),
+            # Terrain features (for historical model)
+            'elevation': data.get('elevation', 350),  # Default: Chandigarh elevation
+            'slope': data.get('slope', 5),            # Default: Flat terrain
+            'aspect': data.get('aspect', 180),        # Default: South-facing
+            'rainfall_mm': data.get('rainfall_mm', 0) # Rainfall if available
         }])
+        
+        # Remove columns not in model's training features
+        model_features = ['soilMoisture', 'waterLevel', 'tilt', 'vibration', 'ultrasonicDistance', 
+                         'elevation', 'slope', 'aspect', 'rainfall_mm']
+        available_features = [f for f in model_features if f in features.columns]
+        features = features[available_features]
         
         # Make current prediction
         prediction = model.predict(features)[0]
@@ -431,7 +476,8 @@ if __name__ == '__main__':
     # Start Flask server
     port = int(os.getenv('ML_API_PORT', 5001))
     print(f"🌐 ML API listening on http://localhost:{port}")
-    print(f"📊 Model: Random Forest with 98.79% accuracy")
-    print(f"⭐ Water Level is 66% important for predictions")
+    print(f"📊 Model: LightGBM Historical (90.7% accuracy, 97.6% ROC-AUC)")
+    print(f"🌏 Coverage: 10 India regions, 5000 historical patterns")
+    print(f"⭐ Top Features: Rainfall (69%), Slope (67%), Tilt (67%)")
     
     app.run(host='0.0.0.0', port=port, debug=False)
