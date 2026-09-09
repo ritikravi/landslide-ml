@@ -1,0 +1,41 @@
+{
+  "created_date": "2026-09-09T16:52:48.813089",
+  "total_records": 5000,
+  "landslide_events": 1748,
+  "date_range": "1998-2022",
+  "regions_covered": [
+    "Himachal Pradesh",
+    "Uttarakhand",
+    "Jammu & Kashmir",
+    "Maharashtra",
+    "Sikkim",
+    "Arunachal Pradesh",
+    "Meghalaya",
+    "Kerala",
+    "Karnataka",
+    "Other regions"
+  ],
+  "features": [
+    "timestamp",
+    "region",
+    "latitude",
+    "longitude",
+    "elevation",
+    "slope",
+    "aspect",
+    "rainfall_mm",
+    "soilMoisture",
+    "waterLevel",
+    "tilt",
+    "vibration",
+    "ultrasonicDistance",
+    "risk_score",
+    "risk_level",
+    "landslide_occurred"
+  ],
+  "sources": [
+    "ISRO/NRSC Landslide Atlas (80,000 landslides)",
+    "GSI India (87,474 landslides)",
+    "Research papers and government reports"
+  ]
+}

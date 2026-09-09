@@ -1,0 +1,50 @@
+{
+  "training_date": "2026-09-09T16:54:03.698891",
+  "dataset": "India Historical Landslides (1998-2022)",
+  "samples": 5000,
+  "features": [
+    "elevation",
+    "slope",
+    "aspect",
+    "rainfall_mm",
+    "soilMoisture",
+    "waterLevel",
+    "tilt",
+    "vibration",
+    "ultrasonicDistance"
+  ],
+  "models_trained": [
+    "RandomForest",
+    "XGBoost",
+    "LightGBM"
+  ],
+  "best_model": "LightGBM",
+  "performance": {
+    "RandomForest": {
+      "accuracy": 0.905,
+      "precision": 0.8828828828828829,
+      "recall": 0.84,
+      "f1_score": 0.8609077598828697,
+      "roc_auc": 0.975301098901099
+    },
+    "XGBoost": {
+      "accuracy": 0.904,
+      "precision": 0.8735294117647059,
+      "recall": 0.8485714285714285,
+      "f1_score": 0.8608695652173913,
+      "roc_auc": 0.9743120879120879
+    },
+    "LightGBM": {
+      "accuracy": 0.907,
+      "precision": 0.8858858858858859,
+      "recall": 0.8428571428571429,
+      "f1_score": 0.8638360175695461,
+      "roc_auc": 0.9756791208791209
+    }
+  },
+  "data_sources": [
+    "ISRO/NRSC Landslide Atlas (80,000 landslides)",
+    "GSI India (87,474 landslides)",
+    "India regions: Uttarakhand, Himachal, J&K, Sikkim, Kerala, etc."
+  ]
+}
