@@ -365,11 +365,13 @@ def predict():
                 for feature_name, contrib in sorted_features[:3]:  # Top 3 contributors
                     if abs(contrib['contribution']) > 0.01:  # Only significant contributions
                         impact_word = "increasing" if contrib['impact'] == 'increases' else "reducing"
+                        # Format feature name for display
+                        display_name = (feature_name
+                                       .replace('soilMoisture', 'Soil Moisture')
+                                       .replace('waterLevel', 'Water Level')
+                                       .replace('ultrasonicDistance', 'Distance'))
                         top_factors.append(
-                            f"{feature_name.replace('soilMoisture', 'Soil Moisture')
-                                          .replace('waterLevel', 'Water Level')
-                                          .replace('ultrasonicDistance', 'Distance')} "
-                            f"({contrib['value']:.1f}) is {impact_word} risk"
+                            f"{display_name} ({contrib['value']:.1f}) is {impact_word} risk"
                         )
                 
                 shap_explanation = {
