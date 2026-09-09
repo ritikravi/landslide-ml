@@ -12,6 +12,7 @@ import numpy as np
 import os
 from datetime import datetime
 from trend_forecasting import TrendForecaster
+import shap
 
 app = Flask(__name__)
 CORS(app)
@@ -27,13 +28,23 @@ anomaly_model = None
 anomaly_scaler = None
 anomaly_thresholds = None
 forecaster = TrendForecaster()
+shap_explainer = None  # SHAP explainer for model interpretability
 
 def load_model():
-    global model, anomaly_model, anomaly_scaler, anomaly_thresholds
+    global model, anomaly_model, anomaly_scaler, anomaly_thresholds, shap_explainer
 
     if os.path.exists(MODEL_PATH):
         model = joblib.load(MODEL_PATH)
         print(f"✅ RandomForest model loaded from {MODEL_PATH}")
+        
+        # Initialize SHAP explainer for the loaded model
+        try:
+            print("🔍 Initializing SHAP explainer...")
+            shap_explainer = shap.TreeExplainer(model)
+            print("✅ SHAP explainer initialized successfully")
+        except Exception as e:
+            print(f"⚠️  SHAP explainer initialization failed: {e}")
+            shap_explainer = None
     else:
         print(f"❌ Model file not found: {MODEL_PATH}")
         return False
@@ -53,10 +64,11 @@ def home():
     """Root endpoint - API info"""
     return jsonify({
         'name': 'Landslide ML Prediction API',
-        'version': '1.0.0',
+        'version': '2.0.0',
         'status': 'operational',
         'model': 'Random Forest Classifier',
         'accuracy': '98.79%',
+        'explainability': 'SHAP (SHapley Additive exPlanations)',
         'endpoints': {
             'health': '/health',
             'predict': '/predict (POST)',
@@ -65,8 +77,16 @@ def home():
         'usage': {
             'example': 'POST /predict with JSON body',
             'required_fields': ['soilMoisture', 'waterLevel', 'tilt', 'vibration'],
-            'optional_fields': ['ultrasonicDistance']
-        }
+            'optional_fields': ['ultrasonicDistance', 'history']
+        },
+        'features': [
+            'Risk prediction (LOW/MEDIUM/HIGH/CRITICAL)',
+            'Confidence score',
+            'SHAP explainability - why this prediction?',
+            'Feature importance analysis',
+            'Anomaly detection',
+            'Trend forecasting'
+        ]
     })
 
 @app.route('/health', methods=['GET'])
@@ -75,8 +95,10 @@ def health():
     return jsonify({
         'status': 'healthy',
         'model_loaded': model is not None,
+        'shap_enabled': shap_explainer is not None,
         'anomaly_model_loaded': anomaly_model is not None,
-        'model_path': MODEL_PATH
+        'model_path': MODEL_PATH,
+        'explainability': 'SHAP TreeExplainer' if shap_explainer else 'Not initialized'
     })
 
 def detect_anomaly(current_data, history=None):
@@ -256,6 +278,68 @@ def predict():
             'ultrasonicDistance': float(model.feature_importances_[4])
         }
         
+        # Generate SHAP explanation
+        shap_explanation = None
+        if shap_explainer is not None:
+            try:
+                # Calculate SHAP values for this prediction
+                shap_values = shap_explainer.shap_values(features)
+                
+                # For binary classification, shap_values is a list [class_0_values, class_1_values]
+                # We want the values for the predicted class
+                if isinstance(shap_values, list):
+                    # Get SHAP values for the positive class (landslide risk)
+                    shap_vals = shap_values[-1][0]  # Last class, first sample
+                else:
+                    shap_vals = shap_values[0]
+                
+                # Get base value (expected value)
+                base_value = shap_explainer.expected_value
+                if isinstance(base_value, list):
+                    base_value = base_value[-1]
+                
+                # Create feature contributions dictionary
+                feature_names = ['soilMoisture', 'waterLevel', 'tilt', 'vibration', 'ultrasonicDistance']
+                contributions = {}
+                for i, feature_name in enumerate(feature_names):
+                    contributions[feature_name] = {
+                        'value': float(features[feature_name].iloc[0]),
+                        'contribution': float(shap_vals[i]),
+                        'impact': 'increases' if shap_vals[i] > 0 else 'decreases' if shap_vals[i] < 0 else 'neutral'
+                    }
+                
+                # Sort by absolute contribution
+                sorted_features = sorted(
+                    contributions.items(), 
+                    key=lambda x: abs(x[1]['contribution']), 
+                    reverse=True
+                )
+                
+                # Generate explanation text
+                top_factors = []
+                for feature_name, contrib in sorted_features[:3]:  # Top 3 contributors
+                    if abs(contrib['contribution']) > 0.01:  # Only significant contributions
+                        impact_word = "increasing" if contrib['impact'] == 'increases' else "reducing"
+                        top_factors.append(
+                            f"{feature_name.replace('soilMoisture', 'Soil Moisture')
+                                          .replace('waterLevel', 'Water Level')
+                                          .replace('ultrasonicDistance', 'Distance')} "
+                            f"({contrib['value']:.1f}) is {impact_word} risk"
+                        )
+                
+                shap_explanation = {
+                    'baseValue': float(base_value),
+                    'contributions': contributions,
+                    'topFactors': top_factors,
+                    'explanation': f"Risk prediction driven by: {', '.join(top_factors[:2])}" if top_factors else "Multiple factors contributing equally"
+                }
+                
+                print(f"✅ SHAP explanation generated: {top_factors}")
+                
+            except Exception as e:
+                print(f"⚠️  SHAP explanation failed: {e}")
+                shap_explanation = None
+        
         response = {
             'success': True,
             'prediction': {
@@ -266,6 +350,10 @@ def predict():
                 'featureImportance': feature_importance
             }
         }
+        
+        # Add SHAP explanation if available
+        if shap_explanation:
+            response['prediction']['shapExplanation'] = shap_explanation
 
         # Run anomaly detection
         current_data_for_anomaly = {
