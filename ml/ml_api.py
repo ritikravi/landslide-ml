@@ -366,10 +366,7 @@ def predict():
                     if abs(contrib['contribution']) > 0.01:  # Only significant contributions
                         impact_word = "increasing" if contrib['impact'] == 'increases' else "reducing"
                         # Format feature name for display
-                        display_name = (feature_name
-                                       .replace('soilMoisture', 'Soil Moisture')
-                                       .replace('waterLevel', 'Water Level')
-                                       .replace('ultrasonicDistance', 'Distance'))
+                        display_name = feature_name.replace('soilMoisture', 'Soil Moisture').replace('waterLevel', 'Water Level').replace('ultrasonicDistance', 'Distance')
                         top_factors.append(
                             f"{display_name} ({contrib['value']:.1f}) is {impact_word} risk"
                         )
