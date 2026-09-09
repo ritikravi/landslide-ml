@@ -117,6 +117,98 @@
   z-index: 1;
 }
 
+/* Risk Assessment Section */
+.risk-assessment {
+  background: rgba(30, 41, 59, 0.6);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+  border: 1px solid #475569;
+}
+
+.risk-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.risk-label {
+  color: #94a3b8;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.risk-badge {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.risk-badge.low {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4CAF50;
+  border: 1px solid rgba(76, 175, 80, 0.4);
+}
+
+.risk-badge.medium {
+  background: rgba(255, 152, 0, 0.2);
+  color: #FF9800;
+  border: 1px solid rgba(255, 152, 0, 0.4);
+}
+
+.risk-badge.high {
+  background: rgba(244, 67, 54, 0.2);
+  color: #f44336;
+  border: 1px solid rgba(244, 67, 54, 0.4);
+}
+
+/* Quick Stats Section */
+.quick-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.stat-box {
+  background: rgba(30, 41, 59, 0.5);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+  border: 1px solid #475569;
+  transition: all 0.3s ease;
+}
+
+.stat-box:hover {
+  background: rgba(51, 65, 85, 0.7);
+  transform: translateY(-2px);
+}
+
+.stat-label {
+  font-size: 11px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 20px;
+  color: #e2e8f0;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
 .gpm-details {
   background: rgba(30, 41, 59, 0.6);
   backdrop-filter: blur(10px);

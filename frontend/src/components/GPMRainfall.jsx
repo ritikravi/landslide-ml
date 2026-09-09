@@ -63,14 +63,16 @@ function GPMRainfall() {
 
   const rainfall = gpmData?.rainfall_mm || 0;
   const getRainfallStatus = () => {
-    if (rainfall === 0) return { status: 'No rain', color: '#4CAF50', icon: '☀️' };
-    if (rainfall < 10) return { status: 'Light rain', color: '#2196F3', icon: '🌦️' };
-    if (rainfall < 30) return { status: 'Moderate rain', color: '#FF9800', icon: '🌧️' };
-    return { status: 'Heavy rain', color: '#f44336', icon: '⛈️' };
+    if (rainfall === 0) return { status: 'No rain', color: '#4CAF50', icon: '☀️', risk: 'Low' };
+    if (rainfall < 10) return { status: 'Light rain', color: '#2196F3', icon: '🌦️', risk: 'Low' };
+    if (rainfall < 30) return { status: 'Moderate rain', color: '#FF9800', icon: '🌧️', risk: 'Medium' };
+    return { status: 'Heavy rain', color: '#f44336', icon: '⛈️', risk: 'High' };
   };
 
   const status = getRainfallStatus();
   const maxTrend = Math.max(...trendData.map(d => d.value), 1);
+  const avgTrend = trendData.length > 0 ? (trendData.reduce((sum, d) => sum + d.value, 0) / trendData.length).toFixed(1) : '0.0';
+  const weekTotal = trendData.length > 0 ? trendData.reduce((sum, d) => sum + d.value, 0).toFixed(1) : '0.0';
 
   return (
     <div className="gpm-rainfall-card" style={{ borderLeft: `4px solid ${status.color}` }}>
@@ -89,6 +91,28 @@ function GPMRainfall() {
 
       <div className="rainfall-status" style={{ color: status.color }}>
         {status.status}
+      </div>
+
+      {/* Risk Assessment */}
+      <div className="risk-assessment">
+        <div className="risk-item">
+          <span className="risk-label">Landslide Risk:</span>
+          <span className={`risk-badge ${status.risk.toLowerCase()}`}>
+            {status.risk}
+          </span>
+        </div>
+      </div>
+
+      {/* Quick Stats */}
+      <div className="quick-stats">
+        <div className="stat-box">
+          <div className="stat-label">7-Day Total</div>
+          <div className="stat-value">{weekTotal} mm</div>
+        </div>
+        <div className="stat-box">
+          <div className="stat-label">Daily Avg</div>
+          <div className="stat-value">{avgTrend} mm</div>
+        </div>
       </div>
 
       {/* 7-Day Trend Sparkline */}

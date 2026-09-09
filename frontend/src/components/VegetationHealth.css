@@ -292,3 +292,44 @@
   color: #64748b;
   font-weight: 500;
 }
+
+/* Trend Statistics Section */
+.trend-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 20px 0;
+  position: relative;
+  z-index: 1;
+}
+
+.trend-stat-box {
+  background: rgba(30, 41, 59, 0.5);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+  border: 1px solid #475569;
+  transition: all 0.3s ease;
+}
+
+.trend-stat-box:hover {
+  background: rgba(51, 65, 85, 0.7);
+  transform: translateY(-2px);
+}
+
+.trend-stat-label {
+  font-size: 11px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.trend-stat-value {
+  font-size: 16px;
+  color: #e2e8f0;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}

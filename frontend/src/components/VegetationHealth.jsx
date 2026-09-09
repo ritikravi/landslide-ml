@@ -83,6 +83,12 @@ function VegetationHealth() {
     return '❌';
   };
 
+  // Calculate NDVI trend statistics
+  const avgNdvi = ndviTrend.length > 0 ? (ndviTrend.reduce((sum, d) => sum + d.ndvi, 0) / ndviTrend.length).toFixed(3) : '0.000';
+  const trendDirection = ndviTrend.length >= 2 ? 
+    (ndviTrend[ndviTrend.length - 1].ndvi > ndviTrend[0].ndvi ? 'Improving' : 'Declining') : 'Stable';
+  const trendIcon = trendDirection === 'Improving' ? '📈' : trendDirection === 'Declining' ? '📉' : '➡️';
+
   return (
     <div className="vegetation-card" style={{ borderLeft: `4px solid ${getHealthColor()}` }}>
       <div className="veg-header">
@@ -158,6 +164,18 @@ function VegetationHealth() {
         <div className="trend-labels">
           <span>6w ago</span>
           <span>Current</span>
+        </div>
+      </div>
+
+      {/* Trend Statistics */}
+      <div className="trend-stats">
+        <div className="trend-stat-box">
+          <div className="trend-stat-label">6-Week Avg</div>
+          <div className="trend-stat-value">{avgNdvi}</div>
+        </div>
+        <div className="trend-stat-box">
+          <div className="trend-stat-label">Trend</div>
+          <div className="trend-stat-value">{trendIcon} {trendDirection}</div>
         </div>
       </div>
 
