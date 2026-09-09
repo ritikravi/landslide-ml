@@ -1,119 +1,177 @@
 .vegetation-card {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border-left: 4px solid #4CAF50;
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 10px 40px rgba(17, 153, 142, 0.4);
+  border: none;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.vegetation-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 50px rgba(17, 153, 142, 0.6);
+}
+
+.vegetation-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  animation: pulse 3s ease-in-out infinite;
 }
 
 .veg-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 1;
 }
 
 .veg-header h3 {
   margin: 0;
-  font-size: 18px;
-  color: #333;
+  font-size: 20px;
+  color: white;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .resolution-badge {
-  background: #E8F5E9;
-  color: #2E7D32;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .ndvi-display {
-  margin: 20px 0;
+  margin: 24px 0;
+  position: relative;
+  z-index: 1;
 }
 
 .ndvi-value {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .ndvi-label {
-  font-size: 14px;
-  color: #666;
-  font-weight: 500;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .ndvi-number {
-  font-size: 36px;
-  font-weight: bold;
+  font-size: 42px;
+  font-weight: 800;
+  color: white;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .ndvi-bar {
-  height: 24px;
-  background: #F5F5F5;
-  border-radius: 12px;
+  height: 28px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 14px;
   overflow: hidden;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .ndvi-fill {
   height: 100%;
-  transition: width 0.5s ease;
-  border-radius: 12px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 14px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 1) 100%);
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.4);
 }
 
 .ndvi-scale {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
-  color: #999;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+  margin-top: 6px;
 }
 
 .health-status {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 15px;
-  margin: 20px 0;
+  gap: 16px;
+  margin: 24px 0;
+  position: relative;
+  z-index: 1;
 }
 
 .status-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: #F5F5F5;
-  padding: 15px;
-  border-radius: 8px;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  padding: 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.status-item:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
 }
 
 .status-icon {
-  font-size: 32px;
+  font-size: 36px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 .status-label {
-  font-size: 12px;
-  color: #666;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
   margin-bottom: 4px;
-}
-
-.status-value {
-  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   font-weight: 600;
 }
 
+.status-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
 .veg-details {
-  background: #F5F5F5;
-  border-radius: 8px;
-  padding: 15px;
-  margin: 15px 0;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 18px;
+  margin: 20px 0;
+  position: relative;
+  z-index: 1;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .detail-row {
   display: flex;
   justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid #E0E0E0;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .detail-row:last-child {
@@ -121,53 +179,71 @@
 }
 
 .detail-label {
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
   font-size: 14px;
+  font-weight: 500;
 }
 
 .detail-value {
-  color: #333;
-  font-weight: 500;
+  color: white;
+  font-weight: 700;
   font-size: 14px;
 }
 
 .ndvi-info {
-  margin-top: 15px;
-  padding: 12px;
-  background: #E3F2FD;
-  border-radius: 8px;
+  margin-top: 20px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  z-index: 1;
 }
 
 .info-text {
   margin: 0;
   font-size: 13px;
-  color: #1976D2;
-  line-height: 1.5;
+  color: white;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+.info-text strong {
+  font-weight: 700;
+  color: white;
 }
 
 .loading,
 .error-message {
   text-align: center;
-  padding: 20px;
-  color: #666;
+  padding: 32px;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
 }
 
 .retry-btn {
   display: block;
-  margin: 10px auto 0;
-  padding: 8px 20px;
-  background: #4CAF50;
+  margin: 16px auto 0;
+  padding: 12px 28px;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
   color: white;
-  border: none;
-  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 25px;
   cursor: pointer;
   font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
 }
 
 .retry-btn:hover {
-  background: #388E3C;
+  background: rgba(255, 255, 255, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 
 .vegetation-card.error {
-  border-left-color: #f44336;
+  background: linear-gradient(135deg, #f44336 0%, #e91e63 100%);
 }
