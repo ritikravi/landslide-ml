@@ -1,0 +1,42 @@
+{
+  "best_model": "LightGBM",
+  "features": [
+    "soilMoisture",
+    "waterLevel",
+    "tilt",
+    "vibration",
+    "ultrasonicDistance",
+    "elevation",
+    "slope",
+    "aspect"
+  ],
+  "terrain_included": true,
+  "models_trained": [
+    "RandomForest",
+    "XGBoost",
+    "LightGBM"
+  ],
+  "comparison_results": {
+    "accuracy": {
+      "RandomForest": 0.9878787878787879,
+      "XGBoost": 0.9939393939393939,
+      "LightGBM": 0.9939393939393939
+    },
+    "precision": {
+      "RandomForest": 0.9819687558817994,
+      "XGBoost": 0.9879166666666667,
+      "LightGBM": 0.9888888888888888
+    },
+    "recall": {
+      "RandomForest": 0.9878787878787879,
+      "XGBoost": 0.9939393939393939,
+      "LightGBM": 0.9939393939393939
+    },
+    "f1_score": {
+      "RandomForest": 0.9845496632996633,
+      "XGBoost": 0.990918590291631,
+      "LightGBM": 0.9911845730027548
+    }
+  },
+  "training_date": "2026-09-09T16:39:59.035899"
+}
