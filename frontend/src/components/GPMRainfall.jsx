@@ -73,6 +73,8 @@ function GPMRainfall() {
   const maxTrend = Math.max(...trendData.map(d => d.value), 1);
   const avgTrend = trendData.length > 0 ? (trendData.reduce((sum, d) => sum + d.value, 0) / trendData.length).toFixed(1) : '0.0';
   const weekTotal = trendData.length > 0 ? trendData.reduce((sum, d) => sum + d.value, 0).toFixed(1) : '0.0';
+  const maxDaily = trendData.length > 0 ? Math.max(...trendData.map(d => d.value)).toFixed(1) : '0.0';
+  const rainyDays = trendData.filter(d => d.value > 1).length;
 
   return (
     <div className="gpm-rainfall-card" style={{ borderLeft: `4px solid ${status.color}` }}>
@@ -112,6 +114,43 @@ function GPMRainfall() {
         <div className="stat-box">
           <div className="stat-label">Daily Avg</div>
           <div className="stat-value">{avgTrend} mm</div>
+        </div>
+      </div>
+
+      {/* Additional Stats */}
+      <div className="additional-stats">
+        <div className="mini-stat">
+          <span className="mini-stat-icon">💧</span>
+          <div className="mini-stat-content">
+            <div className="mini-stat-label">Peak Daily</div>
+            <div className="mini-stat-value">{maxDaily} mm</div>
+          </div>
+        </div>
+        <div className="mini-stat">
+          <span className="mini-stat-icon">🌧️</span>
+          <div className="mini-stat-content">
+            <div className="mini-stat-label">Rainy Days</div>
+            <div className="mini-stat-value">{rainyDays}/7</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Rainfall Intensity Gauge */}
+      <div className="intensity-gauge">
+        <div className="gauge-header">Rainfall Intensity</div>
+        <div className="gauge-bar">
+          <div 
+            className="gauge-fill" 
+            style={{ 
+              width: `${Math.min((rainfall / 50) * 100, 100)}%`,
+              background: status.color
+            }}
+          />
+        </div>
+        <div className="gauge-labels">
+          <span>0</span>
+          <span>25</span>
+          <span>50mm</span>
         </div>
       </div>
 
