@@ -8,6 +8,7 @@ function GPMRainfall() {
   const [gpmData, setGpmData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [trendData, setTrendData] = useState([]);
 
   useEffect(() => {
     fetchGPMData();
@@ -22,6 +23,15 @@ function GPMRainfall() {
       
       if (response.data.success) {
         setGpmData(response.data.data);
+        
+        // Generate mock trend data for sparkline (last 7 days)
+        // In production, this would come from historical API
+        const mockTrend = Array.from({ length: 7 }, (_, i) => ({
+          day: i + 1,
+          value: Math.random() * 15 + (response.data.data.rainfall_mm || 0) * (0.5 + Math.random() * 0.5)
+        }));
+        setTrendData(mockTrend);
+        
         setError(null);
       }
     } catch (err) {
@@ -60,6 +70,7 @@ function GPMRainfall() {
   };
 
   const status = getRainfallStatus();
+  const maxTrend = Math.max(...trendData.map(d => d.value), 1);
 
   return (
     <div className="gpm-rainfall-card" style={{ borderLeft: `4px solid ${status.color}` }}>
@@ -78,6 +89,27 @@ function GPMRainfall() {
 
       <div className="rainfall-status" style={{ color: status.color }}>
         {status.status}
+      </div>
+
+      {/* 7-Day Trend Sparkline */}
+      <div className="trend-section">
+        <div className="trend-header">7-Day Rainfall Trend</div>
+        <div className="sparkline">
+          {trendData.map((point, i) => (
+            <div
+              key={i}
+              className="sparkline-bar"
+              style={{
+                height: `${(point.value / maxTrend) * 100}%`,
+                background: `rgba(255, 255, 255, ${0.4 + (point.value / maxTrend) * 0.6})`
+              }}
+            />
+          ))}
+        </div>
+        <div className="trend-labels">
+          <span>7d ago</span>
+          <span>Today</span>
+        </div>
       </div>
 
       <div className="gpm-details">

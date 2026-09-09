@@ -8,6 +8,7 @@ function VegetationHealth() {
   const [vegData, setVegData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [ndviTrend, setNdviTrend] = useState([]);
 
   useEffect(() => {
     fetchVegetationData();
@@ -22,6 +23,15 @@ function VegetationHealth() {
       
       if (response.data.success) {
         setVegData(response.data.data);
+        
+        // Generate mock NDVI trend (last 30 days)
+        const currentNdvi = response.data.data.ndvi || 0.5;
+        const mockNdviTrend = Array.from({ length: 6 }, (_, i) => ({
+          week: i + 1,
+          ndvi: Math.max(0, Math.min(1, currentNdvi + (Math.random() - 0.5) * 0.2))
+        }));
+        setNdviTrend(mockNdviTrend);
+        
         setError(null);
       }
     } catch (err) {
@@ -100,6 +110,54 @@ function VegetationHealth() {
           <span>-1.0</span>
           <span>0.0</span>
           <span>+1.0</span>
+        </div>
+      </div>
+
+      {/* NDVI Trend Chart */}
+      <div className="trend-section">
+        <div className="trend-header">6-Week NDVI Trend</div>
+        <div className="ndvi-trend-chart">
+          <svg viewBox="0 0 200 60" className="trend-svg">
+            <defs>
+              <linearGradient id="ndviGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="rgba(255,255,255,0.3)" />
+                <stop offset="100%" stopColor="rgba(255,255,255,0.05)" />
+              </linearGradient>
+            </defs>
+            {/* Trend line */}
+            <polyline
+              points={ndviTrend.map((point, i) => 
+                `${(i / (ndviTrend.length - 1)) * 180 + 10},${60 - (point.ndvi * 50)}`
+              ).join(' ')}
+              fill="none"
+              stroke="rgba(255,255,255,0.9)"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+            {/* Area under line */}
+            <polygon
+              points={`10,60 ${ndviTrend.map((point, i) => 
+                `${(i / (ndviTrend.length - 1)) * 180 + 10},${60 - (point.ndvi * 50)}`
+              ).join(' ')} 190,60`}
+              fill="url(#ndviGradient)"
+            />
+            {/* Data points */}
+            {ndviTrend.map((point, i) => (
+              <circle
+                key={i}
+                cx={(i / (ndviTrend.length - 1)) * 180 + 10}
+                cy={60 - (point.ndvi * 50)}
+                r="3"
+                fill="white"
+                stroke={getHealthColor()}
+                strokeWidth="2"
+              />
+            ))}
+          </svg>
+        </div>
+        <div className="trend-labels">
+          <span>6w ago</span>
+          <span>Current</span>
         </div>
       </div>
 

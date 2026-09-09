@@ -159,6 +159,55 @@
   z-index: 1;
 }
 
+/* Trend Sparkline Section */
+.trend-section {
+  margin: 20px 0;
+  position: relative;
+  z-index: 1;
+}
+
+.trend-header {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sparkline {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 60px;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.sparkline-bar {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 3px;
+  min-height: 4px;
+  transition: all 0.3s ease;
+}
+
+.sparkline-bar:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: scaleY(1.1);
+}
+
+.trend-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+}
+
 .loading,
 .error-message {
   text-align: center;
