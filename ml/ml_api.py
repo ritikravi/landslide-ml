@@ -33,6 +33,28 @@ app = Flask(__name__)
 app.json = NumpyJSONProvider(app)
 CORS(app)
 
+# Helper function to convert numpy types recursively
+def convert_to_python_types(obj):
+    """Recursively convert numpy types to Python native types"""
+    if isinstance(obj, dict):
+        return {k: convert_to_python_types(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_to_python_types(item) for item in obj]
+    elif isinstance(obj, (np.integer, np.int64, np.int32, np.int16, np.int8)):
+        return int(obj)
+    elif isinstance(obj, (np.floating, np.float64, np.float32, np.float16)):
+        return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, np.bool_):
+        return bool(obj)
+    elif isinstance(obj, pd.Series):
+        return obj.tolist()
+    elif isinstance(obj, (pd.DataFrame,)):
+        return obj.to_dict('records')
+    else:
+        return obj
+
 # Load the trained model
 # Use historical model for better real-world performance across India regions
 MODEL_PATH = 'landslide_model_historical.pkl'  # NEW: Historical India data (90.7% accuracy, 97.6% ROC-AUC)
@@ -464,7 +486,8 @@ def predict():
                 if warnings:
                     response['prediction']['warnings'] = warnings
         
-        return jsonify(response)
+        # Convert all numpy types to Python natives before returning
+        return jsonify(convert_to_python_types(response))
         
     except Exception as e:
         import traceback
