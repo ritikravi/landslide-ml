@@ -12,12 +12,7 @@ curl -k -s "${ML_API_URL}/health" | python3 -m json.tool || echo "❌ Health che
 
 echo ""
 echo ""
-echo "2️⃣  Model Info..."
-curl -k -s "${ML_API_URL}/model-info" | python3 -m json.tool || echo "❌ Model info failed"
-
-echo ""
-echo ""
-echo "3️⃣  Testing Historical Model with Uttarakhand scenario..."
+echo "2️⃣  Testing Historical Model with Uttarakhand scenario..."
 curl -k -s -X POST "${ML_API_URL}/predict" \
   -H "Content-Type: application/json" \
   -d '{
