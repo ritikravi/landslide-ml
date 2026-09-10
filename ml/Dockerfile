@@ -12,6 +12,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY ml_api.py .
 COPY trend_forecasting.py .
 COPY landslide_model.pkl .
+COPY landslide_model_historical.pkl .
+COPY model_metadata_historical.json .
 COPY anomaly_model.pkl .
 COPY anomaly_scaler.pkl .
 COPY anomaly_thresholds.pkl .
