@@ -19,10 +19,21 @@ import { mlAPI } from './api';
  */
 export const getPrediction = async (sensorData, history = []) => {
   try {
-    const result = await mlAPI.predict({
-      ...sensorData,
-      history
-    });
+    // Extract only the fields needed for prediction
+    const payload = {
+      soilMoisture: sensorData.soilMoisture || 0,
+      waterLevel: sensorData.waterLevel || 0,
+      tilt: sensorData.tilt || 0,
+      vibration: sensorData.vibration || 0,
+      ultrasonicDistance: sensorData.ultrasonicDistance || 0,
+      rainfall: sensorData.rainfall || 0,
+      elevation: sensorData.elevation || 350,
+      slope: sensorData.slope || 5,
+      aspect: sensorData.aspect || 180,
+      history: history || []
+    };
+
+    const result = await mlAPI.predict(payload);
 
     if (!result.success) {
       throw new Error(result.error || 'Prediction failed');
