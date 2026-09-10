@@ -18,6 +18,7 @@ import powerbiRoutes from './routes/powerbiRoutes.js';
 import newsRoutes from './routes/newsRoutes.js';
 import weatherRoutes from './routes/weatherRoutes.js';
 import satelliteRoutes from './routes/satelliteRoutes.js';
+import satelliteMlRoutes from './routes/satelliteMlRoutes.js';
 import geeRoutes from './routes/geeRoutes.js';
 
 dotenv.config();
@@ -66,6 +67,7 @@ app.use('/api/powerbi', powerbiRoutes);
 app.use('/api', newsRoutes);
 app.use('/api', weatherRoutes);
 app.use('/api', satelliteRoutes);
+app.use('/api', satelliteMlRoutes);
 app.use('/api/gee', geeRoutes);
 
 // Health check

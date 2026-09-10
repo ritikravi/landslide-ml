@@ -6,6 +6,7 @@ import RiskIndicator from '../components/RiskIndicator';
 import MLStatusBox from '../components/MLStatusBox';
 import MLPredictionCard from '../components/MLPredictionCard';
 import MLModelsShowcase from '../components/MLModelsShowcase';
+import SatelliteMLPrediction from '../components/SatelliteMLPrediction';
 import GPSMap from '../components/GPSMap';
 import NewsTicker from '../components/NewsTicker';
 import AnomalyDetector from '../components/AnomalyDetector';
@@ -107,6 +108,17 @@ const Dashboard = () => {
           <MLPredictionCard sensorData={sensorData} history={history} />
         </div>
       )}
+
+      {/* Live Satellite ML Prediction */}
+      <div className="transform transition-all duration-300 hover:scale-[1.01]">
+        <SatelliteMLPrediction 
+          location={sensorData?.latitude && sensorData?.longitude ? 
+            { lat: sensorData.latitude, lon: sensorData.longitude } : 
+            null
+          }
+          sensorData={sensorData}
+        />
+      </div>
 
       {/* ML Models Showcase - Show all 3 models */}
       <MLModelsShowcase />
