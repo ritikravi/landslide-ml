@@ -400,13 +400,18 @@ def predict():
                 print(f"⚠️  SHAP explanation failed: {e}")
                 shap_explanation = None
         
+        # Convert all numeric values to native Python types
+        safe_data = {k: int(v) if isinstance(v, (np.integer, np.int64, np.int32)) else 
+                        float(v) if isinstance(v, (np.floating, np.float64, np.float32)) else v 
+                     for k, v in data.items()}
+        
         response = {
             'success': True,
             'prediction': {
-                'riskLevel': prediction,
-                'riskScore': risk_score,
-                'confidence': round(confidence, 2),
-                'features': data,
+                'riskLevel': str(prediction),
+                'riskScore': int(risk_score),
+                'confidence': round(float(confidence), 2),
+                'features': safe_data,
                 'featureImportance': feature_importance
             }
         }
