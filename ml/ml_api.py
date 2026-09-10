@@ -337,7 +337,7 @@ def predict():
                     'error': f'Missing required field: {field}'
                 }), 400
         
-        # Prepare features for model (including terrain features for historical model)
+        # Prepare ALL 9 features for model (historical model requires terrain features)
         features = pd.DataFrame([{
             'soilMoisture': data.get('soilMoisture', 0),
             'waterLevel': data.get('waterLevel', 0),
