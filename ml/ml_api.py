@@ -336,9 +336,23 @@ def predict():
         features = features[available_features]
         
         # Make current prediction
-        prediction = model.predict(features)[0]
+        prediction_class = model.predict(features)[0]
         probabilities = model.predict_proba(features)[0]
         confidence = float(max(probabilities) * 100)
+        
+        # Map numeric prediction to risk level
+        # For binary classification: 0 = No Landslide (LOW), 1 = Landslide (HIGH)
+        if prediction_class == 0:
+            prediction = 'LOW'
+        else:
+            # Determine risk level based on probability
+            landslide_prob = probabilities[1]  # Probability of landslide class
+            if landslide_prob >= 0.8:
+                prediction = 'CRITICAL'
+            elif landslide_prob >= 0.6:
+                prediction = 'HIGH'
+            else:
+                prediction = 'MEDIUM'
         
         # Calculate risk score (0-100)
         risk_score_map = {
@@ -430,7 +444,7 @@ def predict():
         response = {
             'success': True,
             'prediction': {
-                'riskLevel': str(prediction),
+                'riskLevel': prediction,  # Already a string (LOW/MEDIUM/HIGH/CRITICAL)
                 'riskScore': int(risk_score),
                 'confidence': round(float(confidence), 2),
                 'features': safe_data,
