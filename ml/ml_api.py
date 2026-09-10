@@ -527,11 +527,16 @@ def predict():
         
     except Exception as e:
         import traceback
+        error_traceback = traceback.format_exc()
         print(f"❌ Error in /predict: {str(e)}")
-        print(traceback.format_exc())
+        print(error_traceback)
+        
+        # Return detailed error for debugging
         return jsonify({
             'success': False,
-            'error': str(e)
+            'error': str(e),
+            'error_type': type(e).__name__,
+            'traceback': error_traceback.split('\n')[-3:-1] if error_traceback else None
         }), 500
 
 @app.route('/retrain', methods=['POST'])
