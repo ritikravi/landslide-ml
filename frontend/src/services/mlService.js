@@ -19,6 +19,16 @@ import { mlAPI } from './api';
  */
 export const getPrediction = async (sensorData, history = []) => {
   try {
+    // Clean history array - extract only the fields needed
+    const cleanHistory = (history || []).map(reading => ({
+      soilMoisture: reading.soilMoisture || 0,
+      waterLevel: reading.waterLevel || 0,
+      tilt: reading.tilt || 0,
+      vibration: reading.vibration || 0,
+      ultrasonicDistance: reading.ultrasonicDistance || 0,
+      timestamp: reading.timestamp
+    }));
+
     // Extract only the fields needed for prediction
     const payload = {
       soilMoisture: sensorData.soilMoisture || 0,
@@ -30,7 +40,7 @@ export const getPrediction = async (sensorData, history = []) => {
       elevation: sensorData.elevation || 350,
       slope: sensorData.slope || 5,
       aspect: sensorData.aspect || 180,
-      history: history || []
+      history: cleanHistory
     };
 
     const result = await mlAPI.predict(payload);
