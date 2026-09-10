@@ -28,11 +28,16 @@ export const getPrediction = async (sensorData, history = []) => {
       throw new Error(result.error || 'Prediction failed');
     }
 
+    // Map numeric risk levels to strings (backward compatibility)
+    let riskLevel = result.prediction.riskLevel;
+    if (riskLevel === '0' || riskLevel === 0) riskLevel = 'LOW';
+    if (riskLevel === '1' || riskLevel === 1) riskLevel = 'HIGH';
+
     return {
       success: true,
       data: {
         // Risk Assessment
-        riskLevel: result.prediction.riskLevel,
+        riskLevel: riskLevel,
         riskScore: result.prediction.riskScore,
         confidence: result.prediction.confidence,
         
