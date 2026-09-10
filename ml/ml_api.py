@@ -473,8 +473,9 @@ if __name__ == '__main__':
         print("   Run: python simple_ml_example.py")
     
     # Start Flask server
-    port = int(os.getenv('ML_API_PORT', 5001))
-    print(f"🌐 ML API listening on http://localhost:{port}")
+    # Render uses PORT, fallback to ML_API_PORT for local dev
+    port = int(os.getenv('PORT', os.getenv('ML_API_PORT', 5001)))
+    print(f"🌐 ML API listening on http://0.0.0.0:{port}")
     print(f"📊 Model: LightGBM Historical (90.7% accuracy, 97.6% ROC-AUC)")
     print(f"🌏 Coverage: 10 India regions, 5000 historical patterns")
     print(f"⭐ Top Features: Rainfall (69%), Slope (67%), Tilt (67%)")
