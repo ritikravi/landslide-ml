@@ -18,11 +18,8 @@ COPY anomaly_model.pkl .
 COPY anomaly_scaler.pkl .
 COPY anomaly_thresholds.pkl .
 
-# Expose port
-EXPOSE 5001
+# Expose port (Render will override with PORT env var)
+EXPOSE 10000
 
-# Set environment variable
-ENV ML_API_PORT=5001
-
-# Run the application
-CMD ["python", "ml_api.py"]
+# Run the application with gunicorn (production server)
+CMD gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 2 --timeout 120 ml_api:app

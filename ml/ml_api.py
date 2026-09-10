@@ -464,20 +464,18 @@ def retrain():
         'error': 'Retraining not yet implemented'
     }), 501
 
-if __name__ == '__main__':
-    print("🚀 Starting ML Prediction API...")
-    
-    # Load model
-    if not load_model():
-        print("⚠️  Warning: Model not loaded. Please train a model first.")
-        print("   Run: python simple_ml_example.py")
-    
-    # Start Flask server
-    # Render uses PORT, fallback to ML_API_PORT for local dev
-    port = int(os.getenv('PORT', os.getenv('ML_API_PORT', 5001)))
-    print(f"🌐 ML API listening on http://0.0.0.0:{port}")
+# Load model when app starts (for gunicorn)
+print("🚀 Loading ML Model...")
+if not load_model():
+    print("⚠️  Warning: Model not loaded. Please train a model first.")
+else:
+    print("✅ Model loaded successfully!")
     print(f"📊 Model: LightGBM Historical (90.7% accuracy, 97.6% ROC-AUC)")
     print(f"🌏 Coverage: 10 India regions, 5000 historical patterns")
-    print(f"⭐ Top Features: Rainfall (69%), Slope (67%), Tilt (67%)")
-    
+
+# For local development only
+if __name__ == '__main__':
+    print("🚀 Starting ML Prediction API (Development Mode)...")
+    port = int(os.getenv('PORT', os.getenv('ML_API_PORT', 5001)))
+    print(f"🌐 ML API listening on http://0.0.0.0:{port}")
     app.run(host='0.0.0.0', port=port, debug=False)
