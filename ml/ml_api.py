@@ -31,7 +31,22 @@ class NumpyJSONProvider(DefaultJSONProvider):
 
 app = Flask(__name__)
 app.json = NumpyJSONProvider(app)
-CORS(app)
+
+# Enable CORS with explicit configuration
+CORS(app, resources={
+    r"/*": {
+        "origins": [
+            "https://frontend-kappa-two-57.vercel.app",
+            "https://*.vercel.app",
+            "http://localhost:3000",
+            "http://localhost:5173"
+        ],
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": False,
+        "max_age": 3600
+    }
+})
 
 # Helper function to convert numpy types recursively
 def convert_to_python_types(obj):
