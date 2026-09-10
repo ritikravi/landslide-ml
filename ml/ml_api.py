@@ -312,6 +312,10 @@ def predict():
     }
     """
     try:
+        # Log incoming request for debugging
+        print(f"📥 Received prediction request from {request.headers.get('Origin', 'unknown')}")
+        print(f"📦 Request data keys: {list(request.json.keys()) if request.json else 'None'}")
+        
         if model is None:
             return jsonify({
                 'success': False,
