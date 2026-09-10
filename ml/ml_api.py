@@ -351,11 +351,12 @@ def predict():
             'rainfall_mm': data.get('rainfall_mm', data.get('rainfall', 0)) # Accept both rainfall_mm and rainfall
         }])
         
-        # Remove columns not in model's training features
+        # Ensure columns are in the correct order for the model
         model_features = ['soilMoisture', 'waterLevel', 'tilt', 'vibration', 'ultrasonicDistance', 
                          'elevation', 'slope', 'aspect', 'rainfall_mm']
-        available_features = [f for f in model_features if f in features.columns]
-        features = features[available_features]
+        features = features[model_features]
+        
+        print(f"✅ Features prepared: {list(features.columns)}, shape: {features.shape}")
         
         # Make current prediction
         prediction_class = model.predict(features)[0]
