@@ -10,11 +10,24 @@ import joblib
 import pandas as pd
 import numpy as np
 import os
+import json
 from datetime import datetime
 from trend_forecasting import TrendForecaster
 import shap
 
+# Custom JSON encoder to handle numpy/pandas types
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, (np.integer, np.int64)):
+            return int(obj)
+        elif isinstance(obj, (np.floating, np.float64)):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super(NumpyEncoder, self).default(obj)
+
 app = Flask(__name__)
+app.json_encoder = NumpyEncoder
 CORS(app)
 
 # Load the trained model
