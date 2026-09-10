@@ -338,24 +338,20 @@ def predict():
                 }), 400
         
         # Prepare ALL 9 features for model (historical model requires terrain features)
+        # IMPORTANT: Feature order MUST match training order!
         features = pd.DataFrame([{
+            'elevation': data.get('elevation', 350),  # Default: Chandigarh elevation
+            'slope': data.get('slope', 5),            # Default: Flat terrain
+            'aspect': data.get('aspect', 180),        # Default: South-facing
+            'rainfall_mm': data.get('rainfall_mm', data.get('rainfall', 0)), # Accept both
             'soilMoisture': data.get('soilMoisture', 0),
             'waterLevel': data.get('waterLevel', 0),
             'tilt': data.get('tilt', 0),
             'vibration': data.get('vibration', 0),
-            'ultrasonicDistance': data.get('ultrasonicDistance', 0),
-            # Terrain features (for historical model)
-            'elevation': data.get('elevation', 350),  # Default: Chandigarh elevation
-            'slope': data.get('slope', 5),            # Default: Flat terrain
-            'aspect': data.get('aspect', 180),        # Default: South-facing
-            'rainfall_mm': data.get('rainfall_mm', data.get('rainfall', 0)) # Accept both rainfall_mm and rainfall
+            'ultrasonicDistance': data.get('ultrasonicDistance', 0)
         }])
         
-        # Ensure columns are in the correct order for the model
-        model_features = ['soilMoisture', 'waterLevel', 'tilt', 'vibration', 'ultrasonicDistance', 
-                         'elevation', 'slope', 'aspect', 'rainfall_mm']
-        features = features[model_features]
-        
+        # Features are already in correct order, no reordering needed
         print(f"✅ Features prepared: {list(features.columns)}, shape: {features.shape}")
         
         # Make current prediction
