@@ -5,6 +5,7 @@ Receives sensor data and returns landslide risk prediction with trend forecastin
 """
 
 from flask import Flask, request, jsonify
+from flask.json.provider import DefaultJSONProvider
 from flask_cors import CORS
 import joblib
 import pandas as pd
@@ -15,19 +16,21 @@ from datetime import datetime
 from trend_forecasting import TrendForecaster
 import shap
 
-# Custom JSON encoder to handle numpy/pandas types
-class NumpyEncoder(json.JSONEncoder):
+# Custom JSON provider to handle numpy/pandas types
+class NumpyJSONProvider(DefaultJSONProvider):
     def default(self, obj):
-        if isinstance(obj, (np.integer, np.int64)):
+        if isinstance(obj, (np.integer, np.int64, np.int32)):
             return int(obj)
-        elif isinstance(obj, (np.floating, np.float64)):
+        elif isinstance(obj, (np.floating, np.float64, np.float32)):
             return float(obj)
         elif isinstance(obj, np.ndarray):
             return obj.tolist()
-        return super(NumpyEncoder, self).default(obj)
+        elif isinstance(obj, pd.Series):
+            return obj.tolist()
+        return super().default(obj)
 
 app = Flask(__name__)
-app.json_encoder = NumpyEncoder
+app.json = NumpyJSONProvider(app)
 CORS(app)
 
 # Load the trained model
