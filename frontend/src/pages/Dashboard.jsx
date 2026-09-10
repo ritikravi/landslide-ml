@@ -5,6 +5,7 @@ import StatCard from '../components/StatCard';
 import RiskIndicator from '../components/RiskIndicator';
 import MLStatusBox from '../components/MLStatusBox';
 import MLPredictionCard from '../components/MLPredictionCard';
+import MLModelsShowcase from '../components/MLModelsShowcase';
 import GPSMap from '../components/GPSMap';
 import NewsTicker from '../components/NewsTicker';
 import AnomalyDetector from '../components/AnomalyDetector';
@@ -106,6 +107,9 @@ const Dashboard = () => {
           <MLPredictionCard sensorData={sensorData} history={history} />
         </div>
       )}
+
+      {/* ML Models Showcase - Show all 3 models */}
+      <MLModelsShowcase />
 
       {/* Sensor Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
