@@ -71,8 +71,8 @@ def convert_to_python_types(obj):
         return obj
 
 # Load the trained model
-# Use historical model for better real-world performance across India regions
-MODEL_PATH = 'landslide_model_historical.pkl'  # NEW: Historical India data (90.7% accuracy, 97.6% ROC-AUC)
+# Using simple 5-feature model that matches frontend sensor data
+MODEL_PATH = 'landslide_model_simple.pkl'  # Simple 5-feature model (soilMoisture, waterLevel, tilt, vibration, ultrasonicDistance)
 FALLBACK_MODEL_PATH = 'landslide_model.pkl'     # Fallback: Sensor-only model (99.4% accuracy)
 ANOMALY_MODEL_PATH  = 'anomaly_model.pkl'
 ANOMALY_SCALER_PATH = 'anomaly_scaler.pkl'
@@ -337,13 +337,8 @@ def predict():
                     'error': f'Missing required field: {field}'
                 }), 400
         
-        # Prepare ALL 9 features for model (historical model requires terrain features)
-        # IMPORTANT: Feature order MUST match training order!
+        # Prepare features - ONLY 5 sensor features (matches simple model)
         features = pd.DataFrame([{
-            'elevation': data.get('elevation', 350),  # Default: Chandigarh elevation
-            'slope': data.get('slope', 5),            # Default: Flat terrain
-            'aspect': data.get('aspect', 180),        # Default: South-facing
-            'rainfall_mm': data.get('rainfall_mm', data.get('rainfall', 0)), # Accept both
             'soilMoisture': data.get('soilMoisture', 0),
             'waterLevel': data.get('waterLevel', 0),
             'tilt': data.get('tilt', 0),
@@ -351,7 +346,6 @@ def predict():
             'ultrasonicDistance': data.get('ultrasonicDistance', 0)
         }])
         
-        # Features are already in correct order, no reordering needed
         print(f"✅ Features prepared: {list(features.columns)}, shape: {features.shape}")
         
         # Make current prediction
