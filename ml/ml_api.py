@@ -306,6 +306,9 @@ def predict():
         # Get sensor data from request
         data = request.json
         
+        # Extract history for later use (don't delete it yet)
+        history = data.get('history', [])
+        
         # Validate required fields
         required_fields = ['soilMoisture', 'waterLevel', 'tilt', 'vibration']
         for field in required_fields:
@@ -326,7 +329,7 @@ def predict():
             'elevation': data.get('elevation', 350),  # Default: Chandigarh elevation
             'slope': data.get('slope', 5),            # Default: Flat terrain
             'aspect': data.get('aspect', 180),        # Default: South-facing
-            'rainfall_mm': data.get('rainfall_mm', 0) # Rainfall if available
+            'rainfall_mm': data.get('rainfall_mm', data.get('rainfall', 0)) # Accept both rainfall_mm and rainfall
         }])
         
         # Remove columns not in model's training features
