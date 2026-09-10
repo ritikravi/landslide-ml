@@ -4,6 +4,7 @@ import { sensorAPI, mlAPI } from '../services/api';
 import StatCard from '../components/StatCard';
 import RiskIndicator from '../components/RiskIndicator';
 import MLStatusBox from '../components/MLStatusBox';
+import MLPredictionCard from '../components/MLPredictionCard';
 import GPSMap from '../components/GPSMap';
 import NewsTicker from '../components/NewsTicker';
 import AnomalyDetector from '../components/AnomalyDetector';
@@ -98,6 +99,13 @@ const Dashboard = () => {
           <MLStatusBox prediction={prediction} />
         </div>
       </div>
+
+      {/* Production ML Prediction with SHAP Explanations */}
+      {sensorData && (
+        <div className="transform transition-all duration-300 hover:scale-[1.01]">
+          <MLPredictionCard sensorData={sensorData} history={history} />
+        </div>
+      )}
 
       {/* Sensor Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
