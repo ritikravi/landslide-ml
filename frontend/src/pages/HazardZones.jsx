@@ -1,338 +1,336 @@
-import { useState } from 'react';
-import { MapPin, AlertTriangle, Users, Calendar, ExternalLink, Info } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { MapPin, AlertTriangle, Users, TrendingUp, Eye, Filter, Globe } from 'lucide-react';
+import axios from 'axios';
 
-// Real data sourced from ISRO Landslide Atlas of India (NRSC, 2023)
-// covering ~80,000 mapped landslides across 17 states + 2 UTs (1998–2022)
-const HAZARD_ZONES = [
-  {
-    id: 1, name: 'Rudraprayag, Uttarakhand', lat: 30.2847, lng: 78.9820,
-    risk: 'CRITICAL', state: 'Uttarakhand',
-    deaths: '5,000+', year: 2013, event: 'Kedarnath Disaster',
-    description: 'Highest landslide risk district in India per ISRO Atlas. Houses Kedarnath shrine on unstable Himalayan slopes. 2013 cloudburst triggered catastrophic debris flows.',
-    area: '2,439 km²', annualEvents: '150+', source: 'ISRO NRSC Landslide Atlas 2023'
-  },
-  {
-    id: 2, name: 'Tehri Garhwal, Uttarakhand', lat: 30.3780, lng: 78.4800,
-    risk: 'CRITICAL', state: 'Uttarakhand',
-    deaths: '200+', year: 2021, event: 'Multiple monsoon events',
-    description: 'Second highest landslide exposure in India. Steep terrain, seismic zone V, heavy monsoon rainfall. Tehri dam reservoir influences slope stability.',
-    area: '3,642 km²', annualEvents: '100+', source: 'ISRO NRSC Landslide Atlas 2023'
-  },
-  {
-    id: 3, name: 'Wayanad, Kerala', lat: 11.6854, lng: 76.1320,
-    risk: 'CRITICAL', state: 'Kerala',
-    deaths: '400+', year: 2024, event: 'Mundakkai-Chooralmala Disaster',
-    description: 'Western Ghats region with intense monsoon. July 2024 landslide killed 400+ in Mundakkai village. Densely forested slopes destabilized by deforestation and extreme rainfall.',
-    area: '2,131 km²', annualEvents: '80+', source: 'Kerala State Disaster Management Authority'
-  },
-  {
-    id: 4, name: 'Pithoragarh, Uttarakhand', lat: 29.5827, lng: 80.2181,
-    risk: 'CRITICAL', state: 'Uttarakhand',
-    deaths: '100+', year: 2023, event: 'Annual monsoon landslides',
-    description: 'Border district with Nepal in high Himalayas. Glacial retreat and permafrost thaw increasing instability. NH-9 frequently blocked.',
-    area: '7,110 km²', annualEvents: '90+', source: 'ISRO NRSC Landslide Atlas 2023'
-  },
-  {
-    id: 5, name: 'Chamoli, Uttarakhand', lat: 30.4000, lng: 79.3290,
-    risk: 'CRITICAL', state: 'Uttarakhand',
-    deaths: '200+', year: 2021, event: 'Rishiganga Glacier Burst',
-    description: 'Feb 2021 glacier burst triggered flash flood killing 200+. Highly unstable glaciated terrain. Location of Nanda Devi Biosphere Reserve.',
-    area: '8,030 km²', annualEvents: '120+', source: 'NDMA India Report 2021'
-  },
-  {
-    id: 6, name: 'Idukki, Kerala', lat: 9.9189, lng: 76.9728,
-    risk: 'HIGH', state: 'Kerala',
-    deaths: '52+', year: 2021, event: 'Rajamala Landslide',
-    description: 'High-altitude tea plantation district. 2021 Rajamala landslide killed 52 workers. Intense SW monsoon, deforestation and soil disturbance key factors.',
-    area: '4,358 km²', annualEvents: '60+', source: 'Kerala SDMA'
-  },
-  {
-    id: 7, name: 'Darjeeling, West Bengal', lat: 27.0360, lng: 88.2627,
-    risk: 'HIGH', state: 'West Bengal',
-    deaths: '100+', year: 2022, event: 'Monsoon landslides',
-    description: 'Highly populated hill station on unstable slopes. Tea gardens and settlements at extreme risk. Annual monsoon causes road blockages and casualties.',
-    area: '3,149 km²', annualEvents: '70+', source: 'ISRO NRSC Landslide Atlas 2023'
-  },
-  {
-    id: 8, name: 'Mangan (North Sikkim)', lat: 27.5142, lng: 88.5326,
-    risk: 'CRITICAL', state: 'Sikkim',
-    deaths: '150+', year: 2023, event: 'Glacial Lake Outburst Flood',
-    description: 'Oct 2023 GLOF from South Lhonak Lake triggered massive debris flow killing 150+. Teesta River valley highly vulnerable to glacier-related events.',
-    area: '4,226 km²', annualEvents: '50+', source: 'NDMA India 2023'
-  },
-  {
-    id: 9, name: 'Kullu, Himachal Pradesh', lat: 31.9579, lng: 77.1095,
-    risk: 'HIGH', state: 'Himachal Pradesh',
-    deaths: '50+', year: 2023, event: 'Monsoon 2023 landslides',
-    description: 'Kullu-Manali valley corridor. Heavy tourist activity on fragile slopes. 2023 monsoon caused widespread destruction. NH-3 frequently disrupted.',
-    area: '5,503 km²', annualEvents: '80+', source: 'ISRO NRSC Landslide Atlas 2023'
-  },
-  {
-    id: 10, name: 'Mandi, Himachal Pradesh', lat: 31.7090, lng: 76.9320,
-    risk: 'HIGH', state: 'Himachal Pradesh',
-    deaths: '30+', year: 2023, event: 'Multiple 2023 events',
-    description: 'Highly landslide-prone district on Beas River valley. 2023 monsoon caused dam spillway concerns. Dense road network exposed to rockfalls.',
-    area: '3,950 km²', annualEvents: '60+', source: 'HP State Disaster Management'
-  },
-  {
-    id: 11, name: 'Aizawl, Mizoram', lat: 23.7271, lng: 92.7176,
-    risk: 'HIGH', state: 'Mizoram',
-    deaths: '30+', year: 2022, event: 'Aizawl city landslides',
-    description: 'Capital city built on extremely steep terrain. High urban density on vulnerable slopes. Annual monsoon causes building collapses and fatalities.',
-    area: '3,576 km²', annualEvents: '40+', source: 'ISRO NRSC Landslide Atlas 2023'
-  },
-  {
-    id: 12, name: 'Kohima, Nagaland', lat: 25.6701, lng: 94.1077,
-    risk: 'HIGH', state: 'Nagaland',
-    deaths: '20+', year: 2022, event: 'Northeast monsoon events',
-    description: 'Capital on ridge terrain. Poorly consolidated soils and intense rainfall. Frequent road and infrastructure damage during monsoon season.',
-    area: '1,463 km²', annualEvents: '30+', source: 'ISRO NRSC Landslide Atlas 2023'
-  },
-  {
-    id: 13, name: 'Shimla, Himachal Pradesh', lat: 31.1048, lng: 77.1734,
-    risk: 'HIGH', state: 'Himachal Pradesh',
-    deaths: '20+', year: 2023, event: 'Urban landslides 2023',
-    description: 'Historic hill station facing increasing urban landslide risk due to unplanned construction. Summer Capital infrastructure repeatedly damaged.',
-    area: '5,131 km²', annualEvents: '40+', source: 'HP State Disaster Management'
-  },
-  {
-    id: 14, name: 'Almora, Uttarakhand', lat: 29.5971, lng: 79.6591,
-    risk: 'MEDIUM', state: 'Uttarakhand',
-    deaths: '15+', year: 2022, event: 'Annual monsoon events',
-    description: 'Kumaon Himalaya district with moderate-high landslide activity. Ancient town on ridge with increasing population pressure on slopes.',
-    area: '3,090 km²', annualEvents: '30+', source: 'ISRO NRSC Landslide Atlas 2023'
-  },
-  {
-    id: 15, name: 'Malappuram, Kerala', lat: 11.0730, lng: 76.0740,
-    risk: 'HIGH', state: 'Kerala',
-    deaths: '60+', year: 2019, event: 'Kavalappara Landslide',
-    description: 'Aug 2019 Kavalappara landslide buried entire village killing 60+. Western Ghats foothills with laterite soils highly vulnerable to intense rainfall.',
-    area: '3,550 km²', annualEvents: '35+', source: 'Kerala SDMA'
-  },
-];
+const API_URL = import.meta.env.VITE_API_URL || 'https://landslide-api.onrender.com';
 
-const RISK_COLORS = {
-  CRITICAL: { dot: 'bg-red-500',    border: 'border-red-500/60',    bg: 'bg-red-500/10',    text: 'text-red-400',    badge: 'bg-red-500/20 text-red-300 border-red-500/40' },
-  HIGH:     { dot: 'bg-orange-500', border: 'border-orange-500/60', bg: 'bg-orange-500/10', text: 'text-orange-400', badge: 'bg-orange-500/20 text-orange-300 border-orange-500/40' },
-  MEDIUM:   { dot: 'bg-yellow-500', border: 'border-yellow-500/60', bg: 'bg-yellow-500/10', text: 'text-yellow-400', badge: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/40' },
-};
+const HazardZones = () => {
+  const [zones, setZones] = useState([]);
+  const [filteredZones, setFilteredZones] = useState([]);
+  const [selectedZone, setSelectedZone] = useState(null);
+  const [liveReport, setLiveReport] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [reportLoading, setReportLoading] = useState(false);
+  const [filter, setFilter] = useState({ country: '', riskLevel: '' });
+  const [stats, setStats] = useState(null);
 
-export default function HazardZones() {
-  const [selected, setSelected] = useState(null);
-  const [filterRisk, setFilterRisk] = useState('ALL');
-  const [filterState, setFilterState] = useState('ALL');
+  useEffect(() => {
+    fetchZones();
+    fetchStats();
+  }, []);
 
-  const states = ['ALL', ...new Set(HAZARD_ZONES.map(z => z.state))];
-  const filtered = HAZARD_ZONES.filter(z =>
-    (filterRisk === 'ALL' || z.risk === filterRisk) &&
-    (filterState === 'ALL' || z.state === filterState)
-  );
+  useEffect(() => {
+    applyFilters();
+  }, [zones, filter]);
 
-  const stats = {
-    critical: HAZARD_ZONES.filter(z => z.risk === 'CRITICAL').length,
-    high: HAZARD_ZONES.filter(z => z.risk === 'HIGH').length,
-    medium: HAZARD_ZONES.filter(z => z.risk === 'MEDIUM').length,
-    totalDeaths: '6,400+',
+  const fetchZones = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API_URL}/api/hazard-zones`);
+      if (response.data.success) {
+        setZones(response.data.zones);
+      }
+    } catch (error) {
+      console.error('Error fetching zones:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const mapUrl = selected
-    ? `https://www.openstreetmap.org/export/embed.html?bbox=${selected.lng - 0.8}%2C${selected.lat - 0.8}%2C${selected.lng + 0.8}%2C${selected.lat + 0.8}&layer=mapnik&marker=${selected.lat}%2C${selected.lng}`
-    : `https://www.openstreetmap.org/export/embed.html?bbox=68.0%2C6.0%2C98.0%2C37.0&layer=mapnik`;
+  const fetchStats = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/hazard-zones/stats/summary`);
+      if (response.data.success) {
+        setStats(response.data.stats);
+      }
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
+  };
+
+  const fetchLiveReport = async (zoneId) => {
+    try {
+      setReportLoading(true);
+      const response = await axios.get(`${API_URL}/api/hazard-zones/${zoneId}/live-report`);
+      if (response.data.success) {
+        setLiveReport(response.data.report);
+      }
+    } catch (error) {
+      console.error('Error fetching live report:', error);
+    } finally {
+      setReportLoading(false);
+    }
+  };
+
+  const applyFilters = () => {
+    let filtered = zones;
+
+    if (filter.country) {
+      filtered = filtered.filter(z => z.country.toLowerCase().includes(filter.country.toLowerCase()));
+    }
+
+    if (filter.riskLevel) {
+      filtered = filtered.filter(z => z.riskLevel === filter.riskLevel);
+    }
+
+    setFilteredZones(filtered);
+  };
+
+  const handleViewReport = (zone) => {
+    setSelectedZone(zone);
+    setLiveReport(null);
+    fetchLiveReport(zone.id);
+  };
+
+  const getRiskColor = (level) => {
+    switch (level) {
+      case 'CRITICAL': return 'text-red-400 bg-red-900/20 border-red-500';
+      case 'HIGH': return 'text-orange-400 bg-orange-900/20 border-orange-500';
+      case 'MEDIUM': return 'text-yellow-400 bg-yellow-900/20 border-yellow-500';
+      case 'LOW': return 'text-green-400 bg-green-900/20 border-green-500';
+      default: return 'text-gray-400 bg-gray-900/20 border-gray-500';
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 max-w-full">
       {/* Header */}
-      <div className="bg-gradient-to-r from-red-900/40 to-slate-900/80 border-2 border-red-500/40 rounded-xl p-6">
-        <div className="flex items-start gap-4">
-          <AlertTriangle className="w-10 h-10 text-red-400 flex-shrink-0 animate-pulse mt-1" />
+      <div className="bg-gradient-to-r from-red-600/20 to-orange-600/20 border-2 border-red-500/50 rounded-xl p-6">
+        <div className="flex items-center mb-3">
+          <AlertTriangle className="w-8 h-8 text-red-400 mr-3" />
+          <h1 className="text-3xl font-bold text-white">Global Landslide Hazard Zones</h1>
+        </div>
+        <p className="text-gray-300 mb-4">
+          Monitor real-time conditions in landslide-prone regions across the world
+        </p>
+
+        {/* Stats */}
+        {stats && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+            <div className="bg-black/20 rounded-lg p-3">
+              <div className="text-2xl font-bold text-white">{stats.total}</div>
+              <div className="text-xs text-gray-400">Total Zones</div>
+            </div>
+            <div className="bg-red-900/30 rounded-lg p-3">
+              <div className="text-2xl font-bold text-red-400">{stats.byRiskLevel.CRITICAL}</div>
+              <div className="text-xs text-gray-400">Critical Risk</div>
+            </div>
+            <div className="bg-orange-900/30 rounded-lg p-3">
+              <div className="text-2xl font-bold text-orange-400">{stats.byRiskLevel.HIGH}</div>
+              <div className="text-xs text-gray-400">High Risk</div>
+            </div>
+            <div className="bg-yellow-900/30 rounded-lg p-3">
+              <div className="text-2xl font-bold text-yellow-400">{stats.byRiskLevel.MEDIUM}</div>
+              <div className="text-xs text-gray-400">Medium Risk</div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Filters */}
+      <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
+        <div className="flex items-center mb-3">
+          <Filter className="w-5 h-5 text-blue-400 mr-2" />
+          <h3 className="text-lg font-semibold text-white">Filters</h3>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white uppercase tracking-wide">
-              India Landslide Hazard Zones
-            </h1>
-            <p className="text-gray-300 text-sm mt-2 max-w-3xl">
-              Based on <span className="text-red-400 font-semibold">ISRO / NRSC Landslide Atlas of India (2023)</span> — 
-              ~80,000 mapped landslides across 17 states covering the Himalayas and Western Ghats (1998–2022). 
-              India ranks <span className="text-red-400 font-semibold">#1 in the world</span> for fatal landslides.
-            </p>
-            <a
-              href="https://www.isro.gov.in/Landslide_Atlas_India.html"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 mt-2"
+            <label className="text-sm text-gray-400 mb-1 block">Country</label>
+            <select
+              value={filter.country}
+              onChange={(e) => setFilter({...filter, country: e.target.value})}
+              className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600"
             >
-              <ExternalLink className="w-3 h-3" /> Source: ISRO.gov.in
-            </a>
+              <option value="">All Countries</option>
+              <option value="India">India</option>
+              <option value="Nepal">Nepal</option>
+              <option value="China">China</option>
+              <option value="Philippines">Philippines</option>
+              <option value="Colombia">Colombia</option>
+              <option value="Italy">Italy</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-sm text-gray-400 mb-1 block">Risk Level</label>
+            <select
+              value={filter.riskLevel}
+              onChange={(e) => setFilter({...filter, riskLevel: e.target.value})}
+              className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600"
+            >
+              <option value="">All Levels</option>
+              <option value="CRITICAL">Critical</option>
+              <option value="HIGH">High</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="LOW">Low</option>
+            </select>
+          </div>
+          <div className="flex items-end">
+            <button
+              onClick={() => setFilter({ country: '', riskLevel: '' })}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 transition-colors"
+            >
+              Reset Filters
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          { label: 'Critical Zones', value: stats.critical, color: 'text-red-400', bg: 'border-red-500/30' },
-          { label: 'High Risk Zones', value: stats.high, color: 'text-orange-400', bg: 'border-orange-500/30' },
-          { label: 'Medium Risk Zones', value: stats.medium, color: 'text-yellow-400', bg: 'border-yellow-500/30' },
-          { label: 'Est. Deaths (mapped events)', value: stats.totalDeaths, color: 'text-white', bg: 'border-slate-500/30' },
-        ].map(s => (
-          <div key={s.label} className={`bg-slate-800/60 border ${s.bg} rounded-xl p-4 text-center`}>
-            <p className={`text-3xl font-bold ${s.color}`}>{s.value}</p>
-            <p className="text-xs text-gray-400 mt-1">{s.label}</p>
+      {/* Zones Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        {filteredZones.map((zone) => (
+          <div
+            key={zone.id}
+            className={`${getRiskColor(zone.riskLevel)} border-2 rounded-xl p-6 transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer`}
+            onClick={() => handleViewReport(zone)}
+          >
+            {/* Header */}
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 className="text-xl font-bold text-white mb-1">{zone.name}</h3>
+                <div className="flex items-center text-sm text-gray-400">
+                  <MapPin className="w-4 h-4 mr-1" />
+                  {zone.region}
+                </div>
+              </div>
+              <div className={`px-3 py-1 rounded-full text-xs font-bold ${
+                zone.riskLevel === 'CRITICAL' ? 'bg-red-500' :
+                zone.riskLevel === 'HIGH' ? 'bg-orange-500' :
+                zone.riskLevel === 'MEDIUM' ? 'bg-yellow-500' :
+                'bg-green-500'
+              } text-white`}>
+                {zone.riskLevel}
+              </div>
+            </div>
+
+            {/* Description */}
+            <p className="text-sm text-gray-300 mb-4">{zone.description}</p>
+
+            {/* Stats */}
+            <div className="space-y-2 mb-4">
+              <div className="flex items-center text-sm">
+                <Users className="w-4 h-4 mr-2 text-gray-400" />
+                <span className="text-gray-300">Population: {zone.population}</span>
+              </div>
+              <div className="flex items-center text-sm">
+                <Globe className="w-4 h-4 mr-2 text-gray-400" />
+                <span className="text-gray-300">Area: {zone.vulnerableArea}</span>
+              </div>
+            </div>
+
+            {/* Tags */}
+            <div className="flex flex-wrap gap-1 mb-4">
+              {zone.tags.slice(0, 3).map((tag, i) => (
+                <span
+                  key={i}
+                  className="text-xs bg-slate-700/50 text-gray-300 px-2 py-1 rounded"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+
+            {/* View Button */}
+            <button
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 flex items-center justify-center transition-colors"
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              View Live Report
+            </button>
           </div>
         ))}
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3 items-center">
-        <div className="flex gap-2">
-          {['ALL', 'CRITICAL', 'HIGH', 'MEDIUM'].map(r => (
-            <button key={r} onClick={() => setFilterRisk(r)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
-                filterRisk === r
-                  ? r === 'CRITICAL' ? 'bg-red-500/30 border-red-500 text-red-300'
-                  : r === 'HIGH' ? 'bg-orange-500/30 border-orange-500 text-orange-300'
-                  : r === 'MEDIUM' ? 'bg-yellow-500/30 border-yellow-500 text-yellow-300'
-                  : 'bg-blue-500/30 border-blue-500 text-blue-300'
-                  : 'bg-slate-800 border-slate-600 text-gray-400 hover:border-slate-500'
-              }`}>{r}</button>
-          ))}
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          {states.map(s => (
-            <button key={s} onClick={() => setFilterState(s)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
-                filterState === s
-                  ? 'bg-blue-500/30 border-blue-500/70 text-blue-300'
-                  : 'bg-slate-800 border-slate-600 text-gray-400 hover:border-slate-500'
-              }`}>{s}</button>
-          ))}
-        </div>
-      </div>
-
-      {/* Main content: Map + List */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Map */}
-        <div className="bg-slate-800/60 border-2 border-slate-700 rounded-xl overflow-hidden shadow-xl">
-          <div className="px-5 py-3 border-b border-slate-700 flex items-center justify-between">
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-red-400" />
-              {selected ? `📍 ${selected.name}` : 'India Overview Map'}
-            </h3>
-            {selected && (
-              <button onClick={() => setSelected(null)}
-                className="text-xs text-gray-400 hover:text-white border border-slate-600 px-2 py-1 rounded">
-                ← Back to India
-              </button>
-            )}
-          </div>
-          <div className="relative h-[480px]">
-            <iframe
-              key={selected?.id ?? 'india'}
-              src={mapUrl}
-              width="100%" height="100%"
-              style={{ border: 'none', filter: 'invert(0.9) hue-rotate(180deg) brightness(0.8) saturate(0.7)' }}
-              title="Hazard Zone Map"
-              loading="lazy"
-            />
-            {/* Legend */}
-            <div className="absolute bottom-3 left-3 bg-slate-900/90 backdrop-blur-sm border border-slate-600 rounded-lg px-3 py-2 text-xs space-y-1">
-              {[['CRITICAL','bg-red-500'],['HIGH','bg-orange-500'],['MEDIUM','bg-yellow-500']].map(([l,c])=>(
-                <div key={l} className="flex items-center gap-2">
-                  <span className={`w-2.5 h-2.5 rounded-full ${c}`} />
-                  <span className="text-gray-300">{l}</span>
-                </div>
-              ))}
-            </div>
-            {selected && (
-              <div className="absolute top-3 right-3 bg-slate-900/90 backdrop-blur-sm border border-slate-600 rounded-lg px-3 py-2 text-xs max-w-[180px]">
-                <p className={`font-bold ${RISK_COLORS[selected.risk].text}`}>{selected.risk} RISK</p>
-                <p className="text-white font-semibold mt-0.5">{selected.name}</p>
-                <p className="text-red-400 mt-0.5">Deaths: {selected.deaths}</p>
+      {/* Live Report Modal */}
+      {selectedZone && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-slate-900 border-2 border-slate-700 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-slate-900 border-b border-slate-700 p-6 flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-white">{selectedZone.name}</h2>
+                <p className="text-gray-400">{selectedZone.region}</p>
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* Zone list */}
-        <div className="space-y-3 max-h-[560px] overflow-y-auto pr-1">
-          {filtered.map(zone => {
-            const c = RISK_COLORS[zone.risk];
-            const isSelected = selected?.id === zone.id;
-            return (
-              <div
-                key={zone.id}
-                onClick={() => setSelected(isSelected ? null : zone)}
-                className={`border rounded-xl p-4 cursor-pointer transition-all duration-300 hover:scale-[1.01] ${
-                  isSelected
-                    ? `${c.border} ${c.bg} shadow-lg`
-                    : 'border-slate-700/60 bg-slate-800/40 hover:border-slate-600'
-                }`}
+              <button
+                onClick={() => setSelectedZone(null)}
+                className="text-gray-400 hover:text-white text-2xl"
               >
-                <div className="flex items-start justify-between gap-3 mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className={`w-3 h-3 rounded-full flex-shrink-0 ${c.dot} ${zone.risk === 'CRITICAL' ? 'animate-pulse' : ''}`} />
-                    <h4 className="text-white font-bold text-sm">{zone.name}</h4>
-                  </div>
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full border flex-shrink-0 ${c.badge}`}>
-                    {zone.risk}
-                  </span>
+                ×
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {reportLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                  <span className="ml-3 text-gray-400">Loading live data...</span>
                 </div>
-
-                <p className="text-gray-400 text-xs leading-relaxed mb-3 ml-5">{zone.description}</p>
-
-                <div className="grid grid-cols-3 gap-2 ml-5">
-                  <div className="bg-slate-700/30 rounded-lg px-2 py-1.5 text-center">
-                    <Users className="w-3 h-3 text-red-400 mx-auto mb-0.5" />
-                    <p className="text-red-400 font-bold text-xs">{zone.deaths}</p>
-                    <p className="text-gray-500 text-[10px]">Deaths</p>
-                  </div>
-                  <div className="bg-slate-700/30 rounded-lg px-2 py-1.5 text-center">
-                    <Calendar className="w-3 h-3 text-blue-400 mx-auto mb-0.5" />
-                    <p className="text-blue-400 font-bold text-xs">{zone.annualEvents}</p>
-                    <p className="text-gray-500 text-[10px]">Events/yr</p>
-                  </div>
-                  <div className="bg-slate-700/30 rounded-lg px-2 py-1.5 text-center">
-                    <Info className="w-3 h-3 text-green-400 mx-auto mb-0.5" />
-                    <p className="text-green-400 font-bold text-xs">{zone.year}</p>
-                    <p className="text-gray-500 text-[10px]">Last Major</p>
-                  </div>
-                </div>
-
-                {isSelected && (
-                  <div className="mt-3 ml-5 pt-3 border-t border-white/10">
-                    <p className="text-xs text-gray-400">
-                      <span className="text-white font-semibold">Event: </span>{zone.event}
+              ) : liveReport ? (
+                <>
+                  {/* Live Risk Assessment */}
+                  <div className={`${getRiskColor(liveReport.liveData.riskLevel)} border-2 rounded-xl p-6`}>
+                    <h3 className="text-xl font-bold mb-2">CURRENT RISK: {liveReport.liveData.riskLevel}</h3>
+                    <div className="text-3xl font-bold mb-2">{liveReport.liveData.riskScore}/100</div>
+                    <p className="text-sm opacity-80">{liveReport.liveData.confidence}% confidence</p>
+                    <p className="text-xs mt-2">
+                      Updated: {new Date(liveReport.liveData.timestamp).toLocaleString()}
                     </p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      <span className="text-white font-semibold">Area: </span>{zone.area}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1 italic">Source: {zone.source}</p>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        window.open(`https://www.openstreetmap.org/?mlat=${zone.lat}&mlon=${zone.lng}#map=12/${zone.lat}/${zone.lng}`, '_blank');
-                      }}
-                      className="mt-2 flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300"
-                    >
-                      <ExternalLink className="w-3 h-3" /> Open in OpenStreetMap
-                    </button>
                   </div>
-                )}
-              </div>
-            );
-          })}
+
+                  {/* Risk Factors */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {Object.entries(liveReport.liveData.factors).map(([key, factor]) => {
+                      if (!factor) return null;
+                      return (
+                        <div key={key} className="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
+                          <h4 className="font-semibold text-white mb-2 capitalize">{key} Risk</h4>
+                          <div className="text-2xl font-bold text-blue-400 mb-2">{factor.level}</div>
+                          <div className="text-sm text-gray-400 mb-2">Score: {factor.score}/100</div>
+                          <ul className="space-y-1">
+                            {factor.factors.map((f, i) => (
+                              <li key={i} className="text-xs text-gray-300">• {f}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Historical Events */}
+                  <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                    <h3 className="text-lg font-bold text-white mb-4">Historical Events</h3>
+                    <ul className="space-y-2">
+                      {liveReport.historicalEvents.map((event, i) => (
+                        <li key={i} className="text-sm text-gray-300 flex items-start">
+                          <span className="text-red-400 mr-2">⚠</span>
+                          {event}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Monitoring Status */}
+                  <div className="bg-blue-900/20 border border-blue-500/50 rounded-lg p-4">
+                    <h4 className="font-semibold text-white mb-2">Monitoring Status</h4>
+                    <p className="text-sm text-gray-300">{liveReport.monitoringStatus}</p>
+                  </div>
+                </>
+              ) : (
+                <p className="text-center text-gray-400 py-12">Unable to load report</p>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
-
-      {/* Disclaimer */}
-      <div className="bg-slate-800/40 border border-slate-700 rounded-xl p-4 flex items-start gap-3">
-        <Info className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-gray-400">
-          Data sourced from the <strong className="text-white">ISRO/NRSC Landslide Atlas of India (2023)</strong>, 
-          NDMA India reports, Kerala SDMA, and HP State Disaster Management Authority.
-          This map shows government-identified high-risk zones and is intended for awareness only.
-          Always follow official advisories from local authorities during monsoon season.
-        </p>
-      </div>
+      )}
     </div>
   );
-}
+};
+
+export default HazardZones;

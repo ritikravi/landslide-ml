@@ -1,0 +1,254 @@
+[
+  {
+    "id": "uttarakhand-chamoli",
+    "name": "Chamoli District",
+    "region": "Uttarakhand, India",
+    "country": "India",
+    "coordinates": {
+      "lat": 30.4,
+      "lon": 79.33
+    },
+    "riskLevel": "HIGH",
+    "description": "Himalayan region with frequent landslides, especially during monsoon. Site of 2021 Chamoli disaster.",
+    "historicalEvents": [
+      "2021 Chamoli disaster - 200+ casualties",
+      "2013 Kedarnath floods - massive landslides",
+      "Frequent monsoon-triggered slides"
+    ],
+    "population": "~391,000",
+    "vulnerableArea": "5,520 km²",
+    "monitoringStatus": "Active - Geological Survey of India",
+    "tags": ["himalaya", "monsoon-prone", "glacier-burst", "high-population"]
+  },
+  {
+    "id": "kerala-idukki",
+    "name": "Idukki District",
+    "region": "Kerala, India",
+    "country": "India",
+    "coordinates": {
+      "lat": 9.85,
+      "lon": 77.1
+    },
+    "riskLevel": "HIGH",
+    "description": "Western Ghats region with steep slopes and heavy monsoon rainfall. Site of 2020 Rajamala landslide.",
+    "historicalEvents": [
+      "2020 Rajamala landslide - 70+ casualties",
+      "2019 Kavalappara landslide - 17 deaths",
+      "2018 Kerala floods - multiple landslides"
+    ],
+    "population": "~1.1 million",
+    "vulnerableArea": "4,358 km²",
+    "monitoringStatus": "Active - Kerala State Disaster Management",
+    "tags": ["western-ghats", "monsoon-prone", "tea-estates", "high-rainfall"]
+  },
+  {
+    "id": "himachal-kinnaur",
+    "name": "Kinnaur District",
+    "region": "Himachal Pradesh, India",
+    "country": "India",
+    "coordinates": {
+      "lat": 31.58,
+      "lon": 78.23
+    },
+    "riskLevel": "CRITICAL",
+    "description": "Trans-Himalayan region on NH-5 with extremely steep terrain. Regular landslides block highways.",
+    "historicalEvents": [
+      "2021 Kinnaur landslide - 28 deaths",
+      "2017 rock slide - 46 casualties",
+      "Annual highway blockages"
+    ],
+    "population": "~84,000",
+    "vulnerableArea": "6,401 km²",
+    "monitoringStatus": "Active - Border Roads Organisation",
+    "tags": ["himalaya", "highway-risk", "steep-terrain", "seismic-zone"]
+  },
+  {
+    "id": "maharashtra-mahabaleshwar",
+    "name": "Mahabaleshwar",
+    "region": "Maharashtra, India",
+    "country": "India",
+    "coordinates": {
+      "lat": 17.93,
+      "lon": 73.66
+    },
+    "riskLevel": "MEDIUM",
+    "description": "Western Ghats hill station with heavy rainfall and tourist activity. 2021 landslide killed 27.",
+    "historicalEvents": [
+      "2021 Taliye village landslide - 27+ deaths",
+      "2019 Ratnagiri landslides - multiple casualties",
+      "Regular monsoon-season slides"
+    ],
+    "population": "~15,000 (plus tourists)",
+    "vulnerableArea": "150 km²",
+    "monitoringStatus": "Moderate - State Geological Department",
+    "tags": ["western-ghats", "tourist-area", "monsoon-prone", "hill-station"]
+  },
+  {
+    "id": "sikkim-gangtok",
+    "name": "Gangtok & Surrounding",
+    "region": "Sikkim, India",
+    "country": "India",
+    "coordinates": {
+      "lat": 27.33,
+      "lon": 88.62
+    },
+    "riskLevel": "HIGH",
+    "description": "Eastern Himalayan capital with steep slopes and seismic activity. Vulnerable to earthquakes.",
+    "historicalEvents": [
+      "2011 earthquake-triggered landslides",
+      "2006 monsoon landslides",
+      "Frequent road blockages"
+    ],
+    "population": "~100,000",
+    "vulnerableArea": "954 km²",
+    "monitoringStatus": "Active - Sikkim State Disaster Management",
+    "tags": ["himalaya", "seismic-zone", "steep-slopes", "capital-city"]
+  },
+  {
+    "id": "jk-ramban",
+    "name": "Ramban District",
+    "region": "Jammu & Kashmir, India",
+    "country": "India",
+    "coordinates": {
+      "lat": 33.25,
+      "lon": 75.19
+    },
+    "riskLevel": "CRITICAL",
+    "description": "Critical location on Jammu-Srinagar highway. Frequent landslides disrupt supply routes.",
+    "historicalEvents": [
+      "2022 multiple highway blockages",
+      "2021 Panthyal landslide",
+      "Regular monsoon disruptions"
+    ],
+    "population": "~283,000",
+    "vulnerableArea": "1,329 km²",
+    "monitoringStatus": "Active - NHAI & Border Roads",
+    "tags": ["highway-critical", "monsoon-prone", "steep-terrain", "strategic-route"]
+  },
+  {
+    "id": "darjeeling-hills",
+    "name": "Darjeeling Hills",
+    "region": "West Bengal, India",
+    "country": "India",
+    "coordinates": {
+      "lat": 27.04,
+      "lon": 88.26
+    },
+    "riskLevel": "HIGH",
+    "description": "Eastern Himalayan tea region with deforestation and urbanization issues.",
+    "historicalEvents": [
+      "2015 landslides - 100+ deaths",
+      "2011 monsoon slides",
+      "Frequent tea estate damages"
+    ],
+    "population": "~1.8 million",
+    "vulnerableArea": "3,149 km²",
+    "monitoringStatus": "Active - Geological Survey of India",
+    "tags": ["himalaya", "tea-gardens", "deforestation", "urbanization"]
+  },
+  {
+    "id": "nepal-sindhupalchok",
+    "name": "Sindhupalchok",
+    "region": "Central Nepal",
+    "country": "Nepal",
+    "coordinates": {
+      "lat": 27.95,
+      "lon": 85.68
+    },
+    "riskLevel": "CRITICAL",
+    "description": "Most landslide-affected district in Nepal. 2015 earthquake severely destabilized slopes.",
+    "historicalEvents": [
+      "2015 earthquake - 3,500+ deaths, massive landslides",
+      "2021 monsoon slides",
+      "Annual casualties"
+    ],
+    "population": "~305,000",
+    "vulnerableArea": "2,542 km²",
+    "monitoringStatus": "International monitoring - ICIMOD",
+    "tags": ["himalaya", "earthquake-zone", "critical", "international-concern"]
+  },
+  {
+    "id": "china-wenchuan",
+    "name": "Wenchuan County",
+    "region": "Sichuan, China",
+    "country": "China",
+    "coordinates": {
+      "lat": 31.48,
+      "lon": 103.58
+    },
+    "riskLevel": "CRITICAL",
+    "description": "Site of 2008 earthquake. Slopes remain highly unstable with frequent debris flows.",
+    "historicalEvents": [
+      "2008 Wenchuan earthquake - 87,000+ casualties",
+      "2013 debris flows",
+      "Ongoing slope instability"
+    ],
+    "population": "~106,000",
+    "vulnerableArea": "4,084 km²",
+    "monitoringStatus": "Active - China Geological Survey",
+    "tags": ["earthquake-zone", "debris-flow", "critical", "post-disaster"]
+  },
+  {
+    "id": "philippines-benguet",
+    "name": "Benguet Province",
+    "region": "Cordillera, Philippines",
+    "country": "Philippines",
+    "coordinates": {
+      "lat": 16.42,
+      "lon": 120.6
+    },
+    "riskLevel": "HIGH",
+    "description": "Mountainous mining region with typhoon-triggered landslides.",
+    "historicalEvents": [
+      "2019 Itogon landslide - 100+ deaths",
+      "2018 Typhoon Mangkhut slides",
+      "Mining-related instability"
+    ],
+    "population": "~791,000",
+    "vulnerableArea": "2,655 km²",
+    "monitoringStatus": "Active - PHIVOLCS",
+    "tags": ["typhoon-prone", "mining", "steep-terrain", "tropical"]
+  },
+  {
+    "id": "colombia-mocoa",
+    "name": "Mocoa",
+    "region": "Putumayo, Colombia",
+    "country": "Colombia",
+    "coordinates": {
+      "lat": 1.15,
+      "lon": -76.65
+    },
+    "riskLevel": "HIGH",
+    "description": "Andean foothills with extreme rainfall. 2017 mudflow killed 300+.",
+    "historicalEvents": [
+      "2017 Mocoa mudflow - 300+ deaths",
+      "Regular rainy season flooding",
+      "Deforestation issues"
+    ],
+    "population": "~50,000",
+    "vulnerableArea": "1,300 km²",
+    "monitoringStatus": "Active - Colombian Geological Survey",
+    "tags": ["andes", "mudflow", "deforestation", "extreme-rainfall"]
+  },
+  {
+    "id": "italy-amalfi",
+    "name": "Amalfi Coast",
+    "region": "Campania, Italy",
+    "country": "Italy",
+    "coordinates": {
+      "lat": 40.63,
+      "lon": 14.6
+    },
+    "riskLevel": "MEDIUM",
+    "description": "UNESCO World Heritage site with steep coastal slopes and intense development.",
+    "historicalEvents": [
+      "2022 Ischia landslide - 12 deaths",
+      "2010 Atrani mudflow - 1 death",
+      "Regular coastal erosion"
+    ],
+    "population": "~65,000",
+    "vulnerableArea": "225 km²",
+    "monitoringStatus": "Active - Italian CNR",
+    "tags": ["coastal", "tourist-area", "mediterranean", "heritage-site"]
+  }
+]

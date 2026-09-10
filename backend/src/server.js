@@ -19,6 +19,7 @@ import newsRoutes from './routes/newsRoutes.js';
 import weatherRoutes from './routes/weatherRoutes.js';
 import satelliteRoutes from './routes/satelliteRoutes.js';
 import satelliteMlRoutes from './routes/satelliteMlRoutes.js';
+import hazardZonesRoutes from './routes/hazardZonesRoutes.js';
 import geeRoutes from './routes/geeRoutes.js';
 
 dotenv.config();
@@ -68,6 +69,7 @@ app.use('/api', newsRoutes);
 app.use('/api', weatherRoutes);
 app.use('/api', satelliteRoutes);
 app.use('/api', satelliteMlRoutes);
+app.use('/api', hazardZonesRoutes);
 app.use('/api/gee', geeRoutes);
 
 // Health check
